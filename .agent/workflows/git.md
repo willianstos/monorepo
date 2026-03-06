@@ -32,7 +32,7 @@ bash bootstrap/git-cycle.sh "06/03/2026" "atlas-raven"
 Default behavior:
 
 - create a checkpoint commit only if the feature branch is dirty
-- push the active feature branch
+- push the active feature branch to both local Gitea (`origin`) and GitHub cloud (`github`)
 - record the run under `.context/runs/git/`
 - do not merge into `main`
 
