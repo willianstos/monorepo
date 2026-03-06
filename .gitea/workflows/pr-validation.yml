@@ -1,0 +1,114 @@
+# PR Validation Pipeline for 01-monorepo
+#
+# Canonical CI gate: branch -> PR -> checks green -> human approval -> merge
+#
+# This workflow runs on every pull_request targeting main.
+# It validates lint, type checking, unit tests, and Redis integration tests.
+# All jobs must pass before the PR can be merged.
+#
+# Runner requirement: act_runner in Docker mode.
+# See docs/gitea-pr-validation.md for operator setup.
+
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -e .[dev]
+
+      - name: Run ruff
+        run: python -m ruff check workspace projects
+
+  types:
+    name: Type Check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -e .[dev]
+
+      - name: Run mypy
+        run: python -m mypy workspace
+
+  tests-unit:
+    name: Unit Tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -e .[dev]
+
+      - name: Run scheduler and tool unit tests
+        run: >-
+          python -m pytest
+          workspace/scheduler/test_orchestration.py
+          workspace/tools/test_policies.py
+          -q
+
+  tests-integration-redis:
+    name: Integration Tests (Redis)
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7.4-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+        ports:
+          - 6380:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install -e .[dev]
+
+      - name: Run Redis integration tests
+        env:
+          REDIS_INTEGRATION_HOST: "127.0.0.1"
+          REDIS_INTEGRATION_PORT: "6380"
+          REDIS_INTEGRATION_DB: "15"
+        run: >-
+          python -m pytest
+          workspace/scheduler/test_redis_integration.py
+          -q
+
+      - name: Compile-check bootstrap and workspace
+        run: python -m compileall bootstrap workspace

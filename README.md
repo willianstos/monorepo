@@ -96,6 +96,16 @@ REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 .context/.venv/bin/python -m
 REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py controlled-flow --reset-db --graph-id rc-local-001 --objective "Release-candidate controlled flow" --project-name 01-monolito
 ```
 
+## CI and PR Gate
+
+All changes to `main` must pass through a pull request with automated CI validation:
+
+```text
+feature branch -> PR to main -> CI checks green -> human approval -> merge
+```
+
+The Gitea Actions pipeline validates lint (ruff), types (mypy), unit tests (pytest), and Redis integration tests on every PR. See [`docs/gitea-pr-validation.md`](./docs/gitea-pr-validation.md) for operator setup, runner configuration, and branch protection settings.
+
 ## Key Docs
 
 - [Architecture](./docs/architecture.md)
@@ -106,3 +116,4 @@ REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation
 - [Workspace Conventions](./WORKSPACE.md)
 - [Local Validation Runbook](./docs/local-validation.md)
 - [Release Candidate Status](./docs/release-candidate.md)
+- [Gitea PR Validation](./docs/gitea-pr-validation.md)

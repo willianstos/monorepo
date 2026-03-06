@@ -49,6 +49,7 @@ The monorepo separates the shared assistant runtime from target projects and ope
 - Local repository wrap-up still requires a `/git` checkpoint on the active feature branch before work is reported complete.
 - `/git` defaults to checkpoint-and-push on the feature branch. Merge into `main` stays explicit and gated.
 - LangGraph remains descriptive here; the scheduler, event bus, and guardrails are the implemented authority.
+- Gitea Actions enforces the PR validation gate: lint, types, unit tests, and Redis integration tests must pass before merge is available. See [`docs/gitea-pr-validation.md`](./docs/gitea-pr-validation.md).
 
 ## Editing Guide
 

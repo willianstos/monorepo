@@ -17,6 +17,7 @@ This repository is ready for controlled local use where Redis, the scheduler, CI
 - Local validation tooling now includes diagnostics, DB reset, graph inspection, audit inspection, metrics snapshot, and a single-command controlled end-to-end flow.
 - Tool contracts now enforce minimum filesystem scope and terminal allowlist policy, with visible audit artifacts under `.context/tool-audit/`.
 - Operator-facing health snapshot now summarizes backlog, blocked tasks, merge blocks, dead letters, and CI failures.
+- Gitea Actions PR validation pipeline implemented with lint, types, unit tests, and Redis integration tests. Branch protection and operator docs documented in [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md).
 
 ## What Remains Open
 

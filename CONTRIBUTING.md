@@ -49,3 +49,16 @@ This repository is a Python blueprint for a local-first AI coding assistant work
 - Run `python -m ruff check workspace projects` and `python -m mypy workspace` for structural Python changes.
 - If a change is documentation-only, state that validation was skipped or limited.
 - Before reporting completion, run `/git dd/mm/aaaa nome-randomico` or `bash bootstrap/git-cycle.sh "dd/mm/aaaa" "nome-randomico"` from WSL.
+
+## CI and PR Gate
+
+All changes to `main` must pass through a Gitea pull request. The PR validation pipeline runs automatically and includes:
+
+- `Lint (ruff)` — `python -m ruff check workspace projects`
+- `Type Check (mypy)` — `python -m mypy workspace`
+- `Unit Tests (pytest)` — `python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q`
+- `Integration Tests (Redis)` — `python -m pytest workspace/scheduler/test_redis_integration.py -q`
+
+All four checks must pass. At least one human approval is required. No merge is permitted without CI + human approval.
+
+See [`docs/gitea-pr-validation.md`](./docs/gitea-pr-validation.md) for operator setup and branch protection configuration.
