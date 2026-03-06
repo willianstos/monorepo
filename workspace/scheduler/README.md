@@ -1,5 +1,7 @@
 # Scheduler
 
+> Last Updated: 06/03/2026
+
 This package implements the separate scheduler service for the local-first AI coding assistant workspace.
 
 The scheduler is stateless at runtime. It rebuilds workflow state from Redis on each event and coordinates work only through Redis Streams.

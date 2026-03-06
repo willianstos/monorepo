@@ -1,5 +1,7 @@
 # Scheduler
 
+> Last Updated: 06/03/2026
+
 ## Purpose
 
 The scheduler is the orchestration service for the AI Software Factory. It is separate from agents and separate from the local model gateway.
@@ -73,6 +75,7 @@ The scheduler never merges automatically.
 
 When the DAG reaches `human_approval_gate`, the scheduler publishes `human_approval_required` to `system_events` and waits for an external completion event before releasing `merge_task`.
 If the approval result is anything other than `approved`, the graph remains blocked and `merge_task` stays undispatched.
+Local `/git` checkpoints on feature branches do not bypass this merge gate.
 
 Trusted approval completion must use:
 
@@ -129,6 +132,7 @@ The scheduler enforces:
 - reviewer may block progression
 - CI cannot be bypassed
 - merge requires human approval
+- task completion checkpoints stay on feature branches unless explicit human-approved merge work is requested
 - system-owned tasks require trusted completion sources
 - direct agent-to-agent calls are forbidden
 - push to `main` is forbidden

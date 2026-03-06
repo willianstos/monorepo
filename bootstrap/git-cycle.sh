@@ -4,11 +4,12 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  bash bootstrap/git-cycle.sh [--dry-run] "dd/mm/aaaa" "nome-randomico"
+  bash bootstrap/git-cycle.sh [--dry-run] [--merge-main] "dd/mm/aaaa" "nome-randomico"
   bash bootstrap/git-cycle.sh --cleanup-smoke
 
 Examples:
   bash bootstrap/git-cycle.sh "06/03/2026" "atlas-raven"
+  bash bootstrap/git-cycle.sh --merge-main "06/03/2026" "atlas-raven"
   bash bootstrap/git-cycle.sh --dry-run "06/03/2026" "atlas-raven"
   bash bootstrap/git-cycle.sh --cleanup-smoke
 EOF
@@ -74,8 +75,15 @@ write_summary() {
     echo "- next_branch: ${next_branch:-n/a}"
     echo "- dry_run: $dry_run"
     echo "- cleanup_smoke: $cleanup_smoke"
+    echo "- merge_main: $merge_main"
     if [ -n "${checkpoint_label:-}" ]; then
       echo "- label: $checkpoint_label"
+    fi
+    if [ -n "${checkpoint_commit:-}" ]; then
+      echo "- checkpoint_commit: $checkpoint_commit"
+    fi
+    if [ -n "${merge_commit:-}" ]; then
+      echo "- merge_commit: $merge_commit"
     fi
     if [ "${#cleaned_branches[@]}" -gt 0 ]; then
       echo "- cleaned_branches: ${cleaned_branches[*]}"
@@ -153,10 +161,13 @@ cleanup_smoke_branches() {
 
 dry_run=false
 cleanup_smoke=false
-action_name="cycle"
+merge_main=false
+action_name="checkpoint"
 date_label=""
 name_label=""
 checkpoint_label=""
+checkpoint_commit=""
+merge_commit=""
 repo_root=""
 origin_url=""
 start_branch=""
@@ -173,6 +184,11 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --dry-run)
       dry_run=true
+      shift
+      ;;
+    --merge-main)
+      merge_main=true
+      action_name="merge-main"
       shift
       ;;
     --cleanup-smoke)
@@ -266,9 +282,9 @@ if git diff --name-only --diff-filter=U | grep -q .; then
 fi
 
 run_cmd git fetch origin --prune
-if [ "$dry_run" = false ]; then
+if [ "$merge_main" = true ] && [ "$dry_run" = false ]; then
   git ls-remote --exit-code --heads origin main >/dev/null
-else
+elif [ "$merge_main" = true ]; then
   log_note '$ git ls-remote --exit-code --heads origin main'
   log_note 'dry-run: skipped'
 fi
@@ -279,6 +295,21 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 run_cmd git push -u origin "$start_branch"
+
+if [ "$dry_run" = false ]; then
+  checkpoint_commit="$(git rev-parse --short HEAD)"
+else
+  checkpoint_commit="dry-run"
+fi
+
+if [ "$merge_main" = false ]; then
+  main_after="$main_before"
+  log_note "checkpoint completed on branch: $start_branch"
+  printf 'checkpoint branch: %s\n' "$start_branch"
+  printf 'audit dir: %s\n' "$audit_dir"
+  exit 0
+fi
+
 run_cmd git switch main
 run_cmd git pull --ff-only origin main
 run_cmd git merge --no-ff "$start_branch" -m "merge(main): ${checkpoint_label}"
@@ -287,8 +318,10 @@ run_cmd git switch -c "$next_branch"
 run_cmd git push -u origin "$next_branch"
 
 if [ "$dry_run" = false ]; then
+  merge_commit="$(git rev-parse --short main)"
   main_after="$(git rev-parse --short main)"
 else
+  merge_commit="dry-run"
   main_after="$main_before"
 fi
 

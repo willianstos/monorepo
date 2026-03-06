@@ -1,5 +1,7 @@
 # Local Validation
 
+> Last Updated: 06/03/2026
+
 ## Redis Integration
 
 Start the dedicated Redis instance used by the integration tests and local orchestration flow:
@@ -33,6 +35,7 @@ Manual or external boundaries:
 - Gitea remains the code-hosting boundary
 - Argo may be simulated locally by publishing CI events into Redis
 - human approval is represented as `source="system"` with explicit approval metadata
+- `/git` may checkpoint the active feature branch locally, but it does not satisfy merge approval by itself
 
 Local commands:
 

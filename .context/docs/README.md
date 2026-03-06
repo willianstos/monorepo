@@ -1,5 +1,7 @@
 # Documentation Index
 
+> Last Updated: 06/03/2026
+
 Welcome to the repository knowledge base. Start with the project overview, then dive into specific guides as needed.
 
 ## Core Guides
@@ -7,6 +9,7 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Contributor Guide](../../CONTRIBUTING.md)
 - [Workspace Conventions](../../WORKSPACE.md)
 - [Guardrails](../../GUARDRAILS.md)
+- [Agent Rules](../../docs/agent_rules.md)
 - [Hybrid Environment Audit (2026-03-05)](../../ENV_AUDIT_WINDOWS_WSL_2026-03-05.md)
 - [Project Overview](./project-overview.md)
 - [Architecture Notes](./architecture.md)
@@ -19,9 +22,10 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Local Validation Runbook](./local-validation.md)
 - [Workflow Index](../../.agent/workflows/README.md)
 - [Local Git Workflow](../../.agent/workflows/git.md)
+- [Finish With Git Rule](../../.agent/rules/finish-with-git.md)
 
 ## Repository Snapshot
-- `.agent/` — Local agent assets: curated skills, vendored catalogs, workflow notes, backups, and memory stubs.
+- `.agent/` — Local agent assets: curated skills, vendored catalogs, workflow notes, rules, backups, and memory stubs.
 - `docs/` — Human-authored architecture and operating guides for the workspace.
 - `env/` — Local environment templates and example configuration inputs.
 - `GUARDRAILS.md` — Narrative explanation of repository safety rules.

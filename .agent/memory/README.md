@@ -1,5 +1,7 @@
 # Agent Memory
 
+> Last Updated: 06/03/2026
+
 This directory is for agent-local memory notes and lightweight distilled context.
 
 It is not the authoritative runtime memory backend. The current runtime memory model is described in:

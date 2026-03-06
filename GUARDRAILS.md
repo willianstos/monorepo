@@ -1,5 +1,7 @@
 # Guardrails
 
+> Last Updated: 06/03/2026
+
 This file explains the repository safety model in plain language.
 
 The machine-readable policy lives under `guardrails/`.
@@ -24,6 +26,7 @@ These controls are already enforced in the active scheduler path:
 - reviewer may block graph progression
 - CI-gated tasks stay blocked until CI passes
 - merge dispatch requires recorded human approval
+- task completion requires a Git checkpoint on the active feature branch before completion is reported
 - retry budgets and dead-letter handling require human attention after repeated failure
 - trusted completion sources are enforced for `human_approval_gate`, `merge_task`, and `rerun_ci`
 - duplicate scheduler events are ignored before state mutation and recorded in `audit_log`
@@ -42,6 +45,7 @@ These controls still need additional hardening beyond the current backlog:
 
 - no task may bypass CI as the source of truth
 - no task may merge to `main` without human approval
+- no task may be reported complete without a `/git` checkpoint or equivalent `bootstrap/git-cycle.sh` run
 - no raw conversation transcript belongs in long-term memory
 - no agent should mutate files outside the selected repository scope
 - no agent should publish fake success to replace CI outcomes
@@ -51,6 +55,8 @@ These controls still need additional hardening beyond the current backlog:
 
 - `guardrails/*.rules`
   Narrative and machine-readable policy source.
+- `.agent/rules/*.md`
+  Workspace-owned operating rules for Antigravity entrypoints and completion behavior.
 - scheduler validation
   Dispatch, result, and transition checks before the graph advances.
 - CI authority

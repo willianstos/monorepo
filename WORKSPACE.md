@@ -1,5 +1,7 @@
 # Workspace Conventions
 
+> Last Updated: 06/03/2026
+
 ## Purpose
 
 The monorepo separates shared orchestration runtime from concrete target projects:
@@ -25,6 +27,8 @@ The monorepo separates shared orchestration runtime from concrete target project
 ## Operating Model
 
 - The default happy path is `issue_created -> planner -> coder -> tester -> reviewer -> human approval -> merge`.
+- Local repository wrap-up requires a `/git` checkpoint on the active feature branch before work is reported complete.
+- `/git` defaults to checkpoint-and-push on the feature branch; merge into `main` stays explicit and gated.
 - Provider choice should remain swappable through model profiles, not hardcoded in agent code.
 - CI failures already route into scheduler-managed fix loops before review and merge can proceed.
 - Reviewer failures and rejected human approval already block graph progression instead of silently retrying.

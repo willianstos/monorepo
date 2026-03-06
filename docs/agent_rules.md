@@ -1,5 +1,7 @@
 # Agent Rules
 
+> Last Updated: 06/03/2026
+
 These rules are enforced by the scheduler and guardrail code paths, not only documented as policy text.
 
 ## Global
@@ -11,6 +13,7 @@ These rules are enforced by the scheduler and guardrail code paths, not only doc
 5. Raw conversations must not be stored in long-term memory.
 6. All model calls go through the existing local gateway endpoint.
 7. Scheduler-enforced task transitions must stay within the allowed lifecycle.
+8. A task is not complete until the active feature branch has a `/git` checkpoint.
 
 ## Planner
 
@@ -28,6 +31,7 @@ These rules are enforced by the scheduler and guardrail code paths, not only doc
 4. Do not fabricate success or bypass checks.
 5. Publish results and failures as durable events.
 6. May not modify tests, fixtures owned by tester, or CI configuration.
+7. May not report completion without a `/git` checkpoint on the active feature branch.
 
 ## Tester
 

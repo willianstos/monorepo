@@ -4,3 +4,4 @@ Coder may not modify CI config.
 Coder may not bypass checks.
 Coder may not fabricate success.
 Coder may not publish direct agent handoffs.
+Coder may not mark work complete without a Git checkpoint on the active feature branch.

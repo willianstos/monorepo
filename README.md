@@ -1,5 +1,7 @@
 # 01-monorepo — Local-First AI Coding Assistant Workspace
 
+> Last Updated: 06/03/2026
+
 A local-first, event-driven AI coding assistant monorepo for controlled software delivery.
 
 This repository is designed as a **human-guided coding workspace**, not an autonomous software company. It uses a Redis-backed scheduler, Redis Streams event bus, CI-authoritative task progression, and explicit human approval before merge.
@@ -54,6 +56,7 @@ This repository preserves these fixed architecture decisions:
 - Agents communicate only through events
 - CI is authoritative
 - Merge to main always requires human approval
+- Task completion requires a `/git` checkpoint on the active feature branch
 - This is an assistant-style system, not a fully autonomous engineer
 
 ## Primary workflow
@@ -163,6 +166,8 @@ This repository enforces these core boundaries:
 * No direct push to main
 * Required path:
   `branch → commit → CI → review → human approval → merge`
+* Required completion checkpoint:
+  `/git dd/mm/aaaa nome-randomico` on the active feature branch
 * No direct agent-to-agent calls
 * No raw conversation logs in long-term memory
 * Coder cannot own tests

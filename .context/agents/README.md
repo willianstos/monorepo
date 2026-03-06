@@ -1,5 +1,7 @@
 # Agent Handbook
 
+> Last Updated: 06/03/2026
+
 This directory contains ready-to-customize playbooks for AI agents collaborating on the repository.
 
 ## Available Agents
@@ -33,3 +35,4 @@ This directory contains ready-to-customize playbooks for AI agents collaborating
 - [Bootstrap Scripts](../../bootstrap/)
 - [Workflow Index](../../.agent/workflows/README.md)
 - [Local Git Workflow](../../.agent/workflows/git.md)
+- [Finish With Git Rule](../../.agent/rules/finish-with-git.md)

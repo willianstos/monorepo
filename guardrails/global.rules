@@ -1,6 +1,8 @@
 AI-generated code is untrusted until validated.
 No push to main.
 Required flow is: branch -> commit -> CI -> review -> human approval -> merge.
+Task completion requires a Git checkpoint on the active feature branch.
+Default /git behavior must not merge main implicitly.
 CI is authoritative.
 No raw conversation logs in long-term memory.
 No direct agent-to-agent calls.

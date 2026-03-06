@@ -1,4 +1,5 @@
 # Planner Agent
 
-Produces an execution plan and converts raw requests into structured work.
+> Last Updated: 06/03/2026
 
+Produces an execution plan and converts raw requests into structured work.

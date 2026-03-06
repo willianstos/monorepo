@@ -1,5 +1,7 @@
 # Memory Layer
 
+> Last Updated: 06/03/2026
+
 Structured memory architecture for the AI development workspace.
 
 ## Memory Layers

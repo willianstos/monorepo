@@ -1,5 +1,7 @@
 # Contributing
 
+> Last Updated: 06/03/2026
+
 This repository is a Python blueprint for a local-first AI engineering workspace. Most changes will touch architecture contracts, scheduler rules, provider routing, or supporting documentation rather than a fully wired production runtime.
 
 ## Setup
@@ -16,6 +18,7 @@ This repository is a Python blueprint for a local-first AI engineering workspace
 - `python -m ruff check workspace projects`
 - `python -m mypy workspace`
 - `REDIS_PORT=6380 python bootstrap/local_validation.py snapshot`
+- `bash bootstrap/git-cycle.sh "06/03/2026" "nome-randomico"`
 
 ## Change Boundaries
 
@@ -30,6 +33,7 @@ This repository is a Python blueprint for a local-first AI engineering workspace
 ## Documentation Expectations
 
 - Keep top-level docs aligned with repository structure changes.
+- Keep repo-owned markdown docs on the current `Last Updated: 06/03/2026` format when they are touched.
 - Do not describe the repository as "placeholders only" when the scheduler/event-bus/runtime contracts are implemented.
 - Link new long-lived guidance from `.context/docs/README.md`.
 - Link new reusable agent instructions from `.context/agents/README.md`.
@@ -41,3 +45,4 @@ This repository is a Python blueprint for a local-first AI engineering workspace
 - Start Redis with `docker compose -f env/docker-compose.redis.yml up -d redis-integration` before running `workspace/scheduler/test_redis_integration.py`.
 - Run `python -m ruff check workspace projects` and `python -m mypy workspace` for structural Python changes.
 - If a change is documentation-only, state that validation was skipped or limited.
+- Before reporting completion, run `/git dd/mm/aaaa nome-randomico` or `bash bootstrap/git-cycle.sh "dd/mm/aaaa" "nome-randomico"` from WSL.

@@ -1,5 +1,7 @@
 # Agent Workspace Assets
 
+> Last Updated: 06/03/2026
+
 This directory now separates local workspace assets from vendored third-party catalogs.
 
 ## Layout
@@ -7,6 +9,7 @@ This directory now separates local workspace assets from vendored third-party ca
 - `skills/` — curated local skills used directly by this workspace.
 - `catalogs/` — vendored external skill repositories kept intact to preserve upstream structure.
 - `backups/` — dated backups and migration leftovers kept for recovery.
+- `rules/` — workspace-owned operating rules for Antigravity completion and slash-command behavior.
 - `workflows/` — Antigravity workflow entrypoints; the basename maps to the slash command, for example `git.md` -> `/git`.
 - `memory/` — lightweight agent-local memory notes.
 
