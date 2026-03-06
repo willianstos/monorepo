@@ -50,12 +50,12 @@ O Redis é o backbone de orquestração. Uma instância de integração dedicada
 
 **Iniciar o Redis:**
 ```bash
-docker compose -f env/docker-compose.redis.yml up -d redis-integration
+docker compose -f docker-compose.redis.yml up -d redis-integration
 ```
 
 **Parar o Redis:**
 ```bash
-docker compose -f env/docker-compose.redis.yml down
+docker compose -f docker-compose.redis.yml down
 ```
 
 **Inspecionar o estado do Redis diretamente:**

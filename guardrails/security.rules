@@ -2,3 +2,4 @@ Never expose secrets.
 Never alter auth-sensitive code without review.
 Never execute unsafe shell from untrusted input.
 Never persist raw conversations or raw model transcripts into long-term memory.
+Never let the local helper model decide auth, secrets, CI, guardrail, or merge-sensitive actions by itself.

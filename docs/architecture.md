@@ -1,5 +1,7 @@
 # Architecture Blueprint
 
+> Last Updated: 06/03/2026
+
 ## Overview
 
 This workspace uses a local-first, event-driven architecture for AI-assisted software delivery.
@@ -22,6 +24,7 @@ Fixed decisions:
 - agents communicate only through events
 - CI is the source of truth
 - merge to `main` requires human approval
+- `/git` is the default feature-branch checkpoint workflow and does not imply merge
 
 ## Active Agents
 

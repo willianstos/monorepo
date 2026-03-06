@@ -84,8 +84,8 @@ class Runner:
         return {
             "path": str(config_path),
             "exists": config_path.exists(),
-            "available_providers": ["local", "codex", "claude", "gemini", "openai"],
-            "local_first": True,
+            "available_providers": ["local", "codex", "claude"],
+            "local_first_for_helper_tasks": True,
             "escalation_threshold": auditor.escalation_threshold,
             "sample_route": {
                 "provider": sample_route.provider,
@@ -94,11 +94,9 @@ class Runner:
                 "transport": sample_route.transport,
             },
             "specializations": {
-                "local": "worker_and_router",
-                "codex": "large_code_generation_and_refactoring",
-                "claude": "architecture_planning_and_complex_debugging",
-                "gemini": "research_and_large_context_analysis",
-                "openai": "general_cloud_fallback",
+                "local": "bounded_low_risk_helper_only",
+                "codex": "implementation_and_repository_edits",
+                "claude": "planning_architecture_debugging_and_review",
             },
         }
 
@@ -110,7 +108,7 @@ class Runner:
             "router_module": "workspace.gateway.router",
             "server_module": "workspace.gateway.server",
             "providers": sorted(router._providers.keys()),
-            "openai_compatible": True,
+            "chat_completions_compatible": True,
         }
 
     def load_tools(self) -> dict[str, Any]:

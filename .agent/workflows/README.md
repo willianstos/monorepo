@@ -1,21 +1,22 @@
-# Local Workflows
+# Shared Workflows
 
-This directory stores workspace-owned Antigravity workflows.
+> Last Updated: 2026-03-06
+
+This directory stores workspace-owned shared workflows. Antigravity uses them directly, and Codex or Claude can follow the same checked-in steps without relying on hidden prompts.
 
 ## Naming Convention
 
 - `workflows/<name>.md` is the canonical workflow file.
-- The workflow basename is the intended slash command.
-- `git.md` is the workflow activated as `/git`.
+- The workflow basename is the intended slash command or operator entrypoint.
+- `git.md` maps to `/git`.
 
 ## Available Workflows
 
-- [`/git`](./git.md) — checkpoint current feature branch, push it, merge into `main`, push `main`, and create the next feature branch.
+- [`/git`](./git.md) — checkpoint and push the active feature branch by default; merge into `main` only with explicit `--merge-main`.
 
 ## Authoring Rules
 
-- Keep workflows WSL-first for repository operations.
-- Prefer calling repository scripts when the workflow contains executable logic.
+- Keep workflows thin and explicit.
+- Prefer repository scripts when the workflow contains executable logic.
 - Keep dangerous Git operations out of workflows by default.
-- Use merge commits for auditability when the workflow updates `main`.
-- Keep Markdown workflows thin; operational behavior should live in scripts under `bootstrap/`.
+- Keep workflows usable from Antigravity, Codex, and Claude with minimal platform-specific branching.

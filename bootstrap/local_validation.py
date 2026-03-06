@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,7 @@ from workspace.event_bus import (
     AGENT_TASK_STREAM,
     CI_EVENT_STREAM,
     MEMORY_EVENT_STREAM,
+    SYSTEM_EVENT_STREAM,
     AgentEvent,
     RedisStreamBus,
 )
@@ -18,6 +20,7 @@ from workspace.runtime.assistant_runtime import AssistantRuntime
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WORKSPACE_ROOT = REPO_ROOT / "workspace"
+LOCAL_VALIDATION_RUNS_ROOT = REPO_ROOT / ".context" / "runs" / "local-validation"
 
 
 def runtime() -> AssistantRuntime:
@@ -28,23 +31,132 @@ def bus() -> RedisStreamBus:
     return RedisStreamBus()
 
 
-def publish(stream: str, event: AgentEvent) -> None:
+def publish_event(stream: str, event: AgentEvent) -> dict[str, Any]:
     redis_id = bus().publish(stream, event)
-    print(
-        json.dumps(
-            {
-                "stream": stream,
-                "redis_id": redis_id,
-                "event": event.to_event_dict(),
-            },
-            indent=2,
-            sort_keys=True,
-        )
-    )
+    return {
+        "stream": stream,
+        "redis_id": redis_id,
+        "event": event.to_event_dict(),
+    }
+
+
+def publish(stream: str, event: AgentEvent) -> None:
+    print(json.dumps(publish_event(stream, event), indent=2, sort_keys=True))
 
 
 def print_json(payload: dict[str, Any]) -> None:
     print(json.dumps(payload, indent=2, sort_keys=True))
+
+
+def reset_db(*, require_confirmation: bool) -> dict[str, Any]:
+    if not require_confirmation:
+        raise SystemExit("Refusing to flush Redis without --yes.")
+
+    client = bus().require_client()
+    client.flushdb()
+    return {
+        "status": "redis_db_flushed",
+        "connection": bus().connection_info(),
+    }
+
+
+def run_scheduler_cycle(*, count: int, block_ms: int) -> dict[str, Any]:
+    return runtime().run_scheduler_cycle(count=count, block_ms=block_ms)
+
+
+def load_graph_snapshot(graph_id: str) -> dict[str, Any]:
+    scheduler = runtime().scheduler_service()
+    graph = scheduler.store.load_graph(graph_id)
+    client = scheduler.bus.require_client()
+    dead_letters = [
+        json.loads(item)
+        for item in client.lrange(scheduler.store.dead_letter_key(graph_id), 0, -1)
+    ]
+    tasks = [
+        {
+            "task_id": task.task_id,
+            "task_type": task.task_type,
+            "assigned_agent": task.assigned_agent,
+            "status": task.status,
+            "dependencies": list(task.dependencies),
+            "retry_count": task.retry_count,
+            "updated_at": task.updated_at,
+        }
+        for task in sorted(graph.tasks.values(), key=lambda item: item.task_id)
+    ]
+    return {
+        "graph_id": graph.graph_id,
+        "status": graph.status,
+        "ci_status": graph.ci_status,
+        "retry_count": graph.retry_count,
+        "max_retry_limit": graph.max_retry_limit,
+        "metadata": graph.metadata,
+        "tasks": tasks,
+        "dead_letters": dead_letters,
+    }
+
+
+def read_stream_records(stream: str, *, count: int) -> list[dict[str, Any]]:
+    client = bus().require_client()
+    if hasattr(client, "xrevrange"):
+        raw_records = list(reversed(client.xrevrange(stream, max="+", min="-", count=count)))
+        return [
+            {
+                "stream": stream,
+                "redis_id": str(redis_id),
+                "event": AgentEvent.from_dict(fields).to_event_dict(),
+            }
+            for redis_id, fields in raw_records
+        ]
+
+    if hasattr(client, "xrange"):
+        raw_records = client.xrange(stream, min="-", max="+", count=count)
+        return [
+            {
+                "stream": stream,
+                "redis_id": str(redis_id),
+                "event": AgentEvent.from_dict(fields).to_event_dict(),
+            }
+            for redis_id, fields in raw_records
+        ]
+
+    records = bus().read_streams({stream: "0"}, count=count, block_ms=0)
+    return [
+        {
+            "stream": record.stream,
+            "redis_id": record.event_id,
+            "event": record.event.to_event_dict(),
+        }
+        for record in records
+    ]
+
+
+def filter_system_events(
+    *,
+    event_type: str,
+    count: int,
+    graph_id: str | None = None,
+    category: str | None = None,
+) -> list[dict[str, Any]]:
+    events = [
+        item
+        for item in read_stream_records(SYSTEM_EVENT_STREAM, count=count)
+        if item["event"]["event_type"] == event_type
+    ]
+    if graph_id is not None:
+        events = [item for item in events if item["event"]["payload"].get("graph_id") == graph_id]
+    if category is not None:
+        events = [item for item in events if item["event"]["payload"].get("category") == category]
+    return events
+
+
+def write_run_artifact(graph_id: str, payload: dict[str, Any]) -> Path:
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    run_dir = LOCAL_VALIDATION_RUNS_ROOT / f"{timestamp}-{graph_id}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    output_path = run_dir / "summary.json"
+    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return output_path
 
 
 def issue_command(args: argparse.Namespace) -> None:
@@ -161,7 +273,7 @@ def memory_write_command(args: argparse.Namespace) -> None:
 
 
 def scheduler_once_command(args: argparse.Namespace) -> None:
-    print_json(runtime().run_scheduler_cycle(count=args.count, block_ms=args.block_ms))
+    print_json(run_scheduler_cycle(count=args.count, block_ms=args.block_ms))
 
 
 def memory_once_command(args: argparse.Namespace) -> None:
@@ -170,6 +282,233 @@ def memory_once_command(args: argparse.Namespace) -> None:
 
 def snapshot_command(_: argparse.Namespace) -> None:
     print_json(runtime().scheduler_health_report())
+
+
+def metrics_command(_: argparse.Namespace) -> None:
+    print_json(runtime().scheduler_health_report())
+
+
+def audit_events_command(args: argparse.Namespace) -> None:
+    print_json(
+        {
+            "stream": SYSTEM_EVENT_STREAM,
+            "event_type": args.event_type,
+            "graph_id": args.graph_id,
+            "category": args.category,
+            "events": filter_system_events(
+                event_type=args.event_type,
+                count=args.count,
+                graph_id=args.graph_id,
+                category=args.category,
+            ),
+        }
+    )
+
+
+def graph_state_command(args: argparse.Namespace) -> None:
+    print_json(load_graph_snapshot(args.graph_id))
+
+
+def reset_db_command(args: argparse.Namespace) -> None:
+    print_json(reset_db(require_confirmation=args.yes))
+
+
+def controlled_flow_command(args: argparse.Namespace) -> None:
+    if args.reset_db:
+        reset_db(require_confirmation=True)
+
+    steps: list[dict[str, Any]] = []
+    cycle_kwargs = {"count": args.count, "block_ms": 0}
+
+    def record_step(name: str, *, published: dict[str, Any], cycle: dict[str, Any]) -> None:
+        steps.append(
+            {
+                "step": name,
+                "published": published,
+                "cycle": cycle,
+            }
+        )
+
+    record_step(
+        "issue_created",
+        published=publish_event(
+            AGENT_TASK_STREAM,
+            AgentEvent.create(
+                event_type="issue_created",
+                source="planner",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": args.graph_id,
+                    "project_name": args.project_name,
+                    "objective": args.objective,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "plan_task_completed",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="planner",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:plan_task",
+                    "project_name": args.project_name,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "implement_task_completed",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="coder",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:implement_task",
+                    "project_name": args.project_name,
+                    "changed_files": [f"projects/{args.project_name}/src/app.py"],
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "test_task_completed",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="tester",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:test_task",
+                    "project_name": args.project_name,
+                    "changed_files": [f"projects/{args.project_name}/tests/test_app.py"],
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "ci_passed",
+        published=publish_event(
+            CI_EVENT_STREAM,
+            AgentEvent.create(
+                event_type="ci_passed",
+                source="ci",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "project_name": args.project_name,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "review_task_completed",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="reviewer",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:review_task",
+                    "project_name": args.project_name,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "merge_attempt_before_approval",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="system",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:merge_task",
+                    "project_name": args.project_name,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "human_approval_recorded",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="system",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:human_approval_gate",
+                    "project_name": args.project_name,
+                    "approval_source": "human",
+                    "approval_status": "approved",
+                    "approval_actor": args.approval_actor,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+    record_step(
+        "merge_task_completed",
+        published=publish_event(
+            AGENT_RESULT_STREAM,
+            AgentEvent.create(
+                event_type="task_completed",
+                source="system",
+                correlation_id=args.correlation_id,
+                payload={
+                    "graph_id": args.graph_id,
+                    "task_id": f"{args.graph_id}:merge_task",
+                    "project_name": args.project_name,
+                },
+            ),
+        ),
+        cycle=run_scheduler_cycle(**cycle_kwargs),
+    )
+
+    summary = {
+        "status": "completed",
+        "graph_id": args.graph_id,
+        "project_name": args.project_name,
+        "steps": steps,
+        "graph": load_graph_snapshot(args.graph_id),
+        "health": runtime().scheduler_health_report(),
+        "audit_events": filter_system_events(
+            event_type="audit_log",
+            count=args.audit_count,
+            graph_id=args.graph_id,
+        ),
+        "system_alerts": filter_system_events(
+            event_type="system_alert",
+            count=args.audit_count,
+            graph_id=args.graph_id,
+        ),
+    }
+    artifact_path = write_run_artifact(args.graph_id, summary)
+    summary["artifact_path"] = str(artifact_path)
+    print_json(summary)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -253,6 +592,38 @@ def build_parser() -> argparse.ArgumentParser:
     snapshot_parser = subparsers.add_parser("snapshot", help="Print scheduler observability snapshot.")
     snapshot_parser.set_defaults(func=snapshot_command)
 
+    metrics_parser = subparsers.add_parser("metrics", help="Print operator-friendly scheduler metrics.")
+    metrics_parser.set_defaults(func=metrics_command)
+
+    audit_parser = subparsers.add_parser("audit-events", help="Inspect audit_log or system_alert events.")
+    audit_parser.add_argument("--event-type", default="audit_log", choices=("audit_log", "system_alert"))
+    audit_parser.add_argument("--count", type=int, default=50)
+    audit_parser.add_argument("--graph-id")
+    audit_parser.add_argument("--category")
+    audit_parser.set_defaults(func=audit_events_command)
+
+    graph_parser = subparsers.add_parser("graph-state", help="Inspect graph, tasks, and dead-letter state.")
+    graph_parser.add_argument("--graph-id", required=True)
+    graph_parser.set_defaults(func=graph_state_command)
+
+    reset_parser = subparsers.add_parser("reset-db", help="Flush the current Redis DB used for validation.")
+    reset_parser.add_argument("--yes", action="store_true")
+    reset_parser.set_defaults(func=reset_db_command)
+
+    flow_parser = subparsers.add_parser(
+        "controlled-flow",
+        help="Run the local controlled planner->coder->tester->reviewer->approval->merge flow.",
+    )
+    flow_parser.add_argument("--graph-id", required=True)
+    flow_parser.add_argument("--objective", required=True)
+    flow_parser.add_argument("--project-name", default="demo-project")
+    flow_parser.add_argument("--approval-actor", default="local-operator")
+    flow_parser.add_argument("--correlation-id", default="11111111-1111-1111-1111-111111111111")
+    flow_parser.add_argument("--count", type=int, default=20)
+    flow_parser.add_argument("--audit-count", type=int, default=100)
+    flow_parser.add_argument("--reset-db", action="store_true")
+    flow_parser.set_defaults(func=controlled_flow_command)
+
     return parser
 
 
@@ -264,4 +635,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

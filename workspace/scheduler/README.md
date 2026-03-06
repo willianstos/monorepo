@@ -1,5 +1,7 @@
 # Scheduler
 
+> Last Updated: 06/03/2026
+
 This package implements the separate scheduler service for the local-first AI coding assistant workspace.
 
 The scheduler is stateless at runtime. It rebuilds workflow state from Redis on each event and coordinates work only through Redis Streams.
@@ -16,6 +18,7 @@ The scheduler is stateless at runtime. It rebuilds workflow state from Redis on 
 - dead-letter repeated failures and raise `system_alert`
 - persist processed event IDs for idempotent handling
 - emit `audit_log` for transition decisions, CI handling, merge-gate blocks, and duplicate suppression
+- expose a local operator snapshot through `AssistantRuntime.scheduler_health_report()`
 
 ## Modules
 
@@ -47,3 +50,10 @@ The scheduler publishes work items rather than calling agents directly.
 - `human_approval_gate`, `merge_task`, and `rerun_ci` enforce trusted completion sources
 - invalid task assignments and invalid status transitions are rejected
 - repeated failures go to a dead-letter path and require human attention
+
+## Local Operator Commands
+
+- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py snapshot`
+- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py metrics`
+- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py audit-events --graph-id <graph-id>`
+- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py graph-state --graph-id <graph-id>`

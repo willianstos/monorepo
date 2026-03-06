@@ -11,7 +11,7 @@ from workspace.memory.schemas import MemoryRecord, MemoryType
 class MemoryManager:
     working_backend: str = "redis"
     session_backend: str = "session_store"
-    long_term_backend: str = "postgres_vector"
+    long_term_backend: str = "redis_distilled_records"
 
     RUNTIME_PROJECT_KEY_TEMPLATE: str = "memory:project:{project_name}:records"
     RUNTIME_GRAPH_KEY_TEMPLATE: str = "memory:graph:{graph_id}:records"
@@ -33,14 +33,13 @@ class MemoryManager:
             },
             "long_term_memory": {
                 "backend": self.long_term_backend,
-                "purpose": "Persistent knowledge with structured records and vector retrieval.",
-                "retention": "persistent",
+                "purpose": "Persistent distilled runtime knowledge keyed in Redis-backed records.",
+                "retention": "run_to_run_until_pruned",
                 "contents": [
                     "decisions",
-                    "architecture_changes",
-                    "experiment_results",
+                    "architecture_constraints",
                     "project_knowledge",
-                    "system_learnings",
+                    "distilled_lessons",
                 ],
             },
         }
@@ -73,18 +72,19 @@ class MemoryManager:
         return {
             "flush_required": bool(distilled),
             "records": distilled,
-            "storage_targets": ["session_memory", "long_term_memory"],
+            "storage_targets": ["session_memory", "runtime_durable_memory"],
             "rules": [
                 "never_store_raw_conversations",
                 "store_distilled_knowledge_only",
                 "prefer_short_structured_summaries",
                 "avoid_duplicates",
                 "always_attach_tags",
+                "save_stable_facts_only",
             ],
         }
 
     def retrieval_order(self) -> tuple[str, ...]:
-        return ("semantic_memory", "structured_memory", "recent_sessions")
+        return ("structured_memory", "recent_sessions")
 
     def runtime_keys(self, *, project_name: str, graph_id: str, task_id: str) -> dict[str, str]:
         return {

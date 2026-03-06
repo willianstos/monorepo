@@ -1,197 +1,492 @@
-# 01-monorepo — Local-First AI Coding Assistant Workspace
+<!-- ──────────────────────────────────────────────────────────────── -->
+<!-- 01-monorepo — The Governed AI Engineering Workspace             -->
+<!-- ──────────────────────────────────────────────────────────────── -->
 
-A local-first, event-driven AI coding assistant monorepo for controlled software delivery.
+<div align="center">
 
-This repository is designed as a **human-guided coding workspace**, not an autonomous software company. It uses a Redis-backed scheduler, Redis Streams event bus, CI-authoritative task progression, and explicit human approval before merge.
+<br>
 
-## What this repository is
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/hero-terminal.png">
+  <source media="(prefers-color-scheme: light)" srcset="./docs/assets/hero-terminal.png">
+  <img alt="01-monorepo — AI Engineering Terminal" src="./docs/assets/hero-terminal.png" width="100%">
+</picture>
 
-This project provides a governed orchestration layer for AI-assisted software work:
+<br>
 
-- **Local-first** runtime and model routing
-- **Event-driven** task orchestration with Redis Streams
-- **Redis-backed DAG persistence**
-- **Minimal primary agents**:
-  - Planner
-  - Coder
-  - Tester
-  - Reviewer
-- **CI-authoritative workflow**
-- **Human approval required before merge**
-- **Guardrails enforced in code**
+# 01-monorepo
 
-## What is enforced today
+### The governed AI coding workspace for teams that ship real software.
 
-The current implementation already includes:
+<br>
 
-- Redis Streams as the only orchestration bus
-- Scheduler as a separate service
-- Redis-backed DAG/task persistence
-- Trusted-source enforcement for protected system tasks
-- Guardrail enforcement in scheduler/runtime paths
-- CI fix-loop orchestration
-- Structured `audit_log` events on `system_events`
-- Runtime memory-write validation for structured records
-- Redis-backed scheduler metrics / health snapshot
-- Duplicate-event idempotency and dead-letter handling
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12+-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Redis Streams](https://img.shields.io/badge/Bus-Redis_Streams-DC382D.svg?style=flat-square&logo=redis&logoColor=white)](./docs/architecture.md)
+[![CI-Gated](https://img.shields.io/badge/CI-Authoritative-2EA44F.svg?style=flat-square)](./docs/gitea-pr-validation.md)
+[![Human Approved](https://img.shields.io/badge/Merge-Human_Approved-8B5CF6.svg?style=flat-square)](./GUARDRAILS.md)
+[![Gitea PR Gate](https://img.shields.io/badge/Gitea-PR_Gated-609926.svg?style=flat-square&logo=gitea&logoColor=white)](./docs/gitea-pr-validation.md)
 
-## What is still partial
+<br>
 
-Some areas are intentionally not yet fully productionized:
+**Codex for execution · Claude for reasoning · Qwen for cheap local helpers**
 
-- Several LangGraph nodes still use placeholder execution behavior
-- Tool adapters are contracts-first, not fully hardened
-- Local Gitea/Argo flow is scaffolded, not yet fully exercised end-to-end
-- Long-term memory is still a Redis-backed runtime sink, not a full durable knowledge layer
+Event-driven · CI-authoritative · Human-approved · Local-first
 
-## Core operating rules
+<br>
 
-This repository preserves these fixed architecture decisions:
+[Why this exists](#-why-this-exists) · 
+[Key Features](#-key-features) · 
+[How it works](#-how-it-works) · 
+[Quick Start](#-quick-start) · 
+[Why not X?](#-why-not-x) · 
+[Model Routing](#-model-routing) · 
+[Docs](#-documentation)
 
-- Scheduler runs as a separate service
-- Redis Streams is the only event/task bus
-- DAG state is persisted in Redis
-- Agents communicate only through events
-- CI is authoritative
-- Merge to main always requires human approval
-- This is an assistant-style system, not a fully autonomous engineer
+<br>
 
-## Primary workflow
+</div>
 
-Default graph:
+<!-- ──────────────────────────────────────────────────────────────── -->
 
-```text
-issue_created
-→ plan_task
-→ implement_task
-→ test_task
-→ review_task
-→ human_approval_gate
-→ merge_task
-````
+## 💡 Why This Exists
 
-On CI failure:
+Most AI coding setups fail in one of two ways:
 
-```text
-ci_failed
-→ fix_task
-→ rerun_ci
-→ continue only after ci_passed
+> **Too weak** to be useful in real engineering workflows.
+> 
+> **Too autonomous** to be trustworthy in a corporate environment.
+
+**01-monorepo is the middle path.**
+
+It is not an "AI company in a repo" toy.  
+It is not a wrapper around a single LLM.  
+It is a **controlled, event-driven AI engineering workspace** — purpose-built so that AI agents accelerate software delivery **without dissolving engineering discipline**.
+
+<table>
+<tr>
+<td width="50%">
+
+### ✅ What it does
+
+- Orchestrates AI agents through a **deterministic DAG scheduler**
+- Routes tasks to the right model at the right cost
+- Enforces CI as the **single source of truth**
+- Requires **human approval** before any merge to `main`
+- Keeps memory **distilled**, never polluted with raw conversations
+- Produces **structured audit trails** for every decision
+
+</td>
+<td width="50%">
+
+### ❌ What it won't do
+
+- Let agents loop endlessly without checkpoints
+- Merge code that hasn't passed CI
+- Trust a local 9B model with security-critical decisions
+- Store raw chat transcripts in durable memory
+- Allow direct agent-to-agent communication
+- Replace engineering judgment with AI confidence
+
+</td>
+</tr>
+</table>
+
+---
+
+## ✨ Key Features
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 🛡️ Governance & Safety
+
+**Human Approval Gate**  
+No merge to `main` without explicit human sign-off.
+
+**Strict Tool Hardening**  
+Policy-based rejection for dangerous operations, with audit artifacts.
+
+**Distilled Memory Only**  
+Raw conversation dumps are rejected at runtime. Only structured facts persist.
+
+**Trusted-Source Enforcement**  
+System-critical tasks (`human_approval_gate`, `merge_task`, `rerun_ci`) are source-verified.
+
+</td>
+<td width="33%" valign="top">
+
+### 🤖 Model Orchestration
+
+**Codex-First Execution**  
+Primary engine for implementation and precise file edits.
+
+**Claude Reasoning**  
+Architecture, planning, deep debugging, and review assistance.
+
+**Local Qwen 9B (Bounded)**  
+Strictly limited to cheap, non-authoritative helper tasks. Never for auth, CI, or merge decisions.
+
+**Cost-Aware Routing**  
+Four execution lanes balance power, privacy, and token economy.
+
+</td>
+<td width="33%" valign="top">
+
+### ⚙️ Engineering Discipline
+
+**CI-Authoritative Fix Loops**  
+Agents cannot self-report success. CI passes or work continues.
+
+**Redis Streams Backbone**  
+The exclusive orchestration bus. Auditable, persistent, and reliable.
+
+**DAG Scheduler**  
+Deterministic `Plan → Code → Test → Review → Approve → Merge` pipeline.
+
+**Dead-Letter & Retry**  
+Configurable retry limits with automatic escalation on exhaustion.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🏗️ How It Works
+
+### The Pipeline
+
+Every issue flows through a fixed, auditable pipeline:
+
+```
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ PLANNER  │───▶│  CODER   │───▶│  TESTER  │───▶│ REVIEWER │───▶│ HUMAN OK │───▶│  MERGE   │
+│          │    │          │    │          │    │          │    │          │    │          │
+│ scope    │    │ impl     │    │ tests    │    │ quality  │    │ approval │    │ main ←   │
+│ criteria │    │ code     │    │ fixtures │    │ risk     │    │ gate     │    │ protected│
+│ ordering │    │ only     │    │ only     │    │ policy   │    │          │    │          │
+└──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘
+                                     │
+                                     ▼ CI fails?
+                              ┌──────────────┐
+                              │  FIX LOOP    │
+                              │ fix → rerun  │
+                              │ → pass only  │
+                              └──────────────┘
 ```
 
-## Repository layout
+### Core Invariants
 
-```text
+| Invariant | Enforcement |
+|:---|:---|
+| Scheduler is a **separate service** | `workspace/scheduler/service.py` |
+| **Redis Streams** is the only bus | No Pub/Sub. Only `XADD`/`XREADGROUP`/`XACK` |
+| Agents communicate **only through events** | No direct agent-to-agent calls |
+| DAG state **persists in Redis** | Granular keys: `dag:*`, `task:*`, `taskstatus:*` |
+| CI is **authoritative** | Agents cannot self-report success |
+| Merge requires **human approval** | Metadata recorded and enforced |
+| Invalid transitions are **rejected + audited** | `audit_log` events on every rejection |
+
+### Event-Driven Architecture
+
+```
+           ┌─────────────────────────────────────────────────────┐
+           │                  REDIS STREAMS                      │
+           │                                                     │
+           │  agent_tasks · agent_results · ci_events            │
+           │  memory_events · system_events                      │
+           └──────────────────────┬──────────────────────────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+        ┌─────▼─────┐     ┌──────▼──────┐     ┌──────▼──────┐
+        │ SCHEDULER  │     │   MEMORY    │     │  GUARDRAIL  │
+        │            │     │   RUNTIME   │     │  ENFORCER   │
+        │ DAG engine │     │ distilled   │     │ ownership   │
+        │ dispatches │     │ writes only │     │ transitions │
+        │ fix loops  │     │ rejects raw │     │ audit trail │
+        └────────────┘     └─────────────┘     └─────────────┘
+```
+
+---
+
+## 🚀 Quick Start
+
+> **Requirements:** Python 3.12+, Docker, Redis
+
+### 1. Clone & Setup
+
+```bash
+git clone <your-repo-url> 01-monorepo
+cd 01-monorepo
+python3 -m venv .context/.venv
+source .context/.venv/bin/activate
+pip install -e .[dev]
+```
+
+### 2. Validate the Stack
+
+```bash
+# Lint + Types + Tests
+ruff check workspace projects
+mypy workspace
+pytest workspace/scheduler/test_orchestration.py -q
+```
+
+### 3. Start Redis
+
+```bash
+docker compose -f docker-compose.redis.yml up -d redis-integration
+```
+
+### 4. Integration Tests
+
+```bash
+REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 \
+  pytest workspace/scheduler/test_redis_integration.py -q
+```
+
+### 5. Run the Controlled Flow
+
+```bash
+REDIS_PORT=6380 REDIS_DB=15 \
+  python bootstrap/local_validation.py controlled-flow \
+  --reset-db \
+  --graph-id rc-local-001 \
+  --objective "Controlled flow validation" \
+  --project-name 01-monorepo
+```
+
+<details>
+<summary><b>Expected output</b></summary>
+
+```
+✓ ruff check ..................... passed
+✓ mypy .......................... passed
+✓ unit tests 28/28 .............. passed
+✓ redis integration ............. healthy
+✓ DAG created ................... rc-local-001
+✓ plan_task ..................... completed
+✓ implement_task ................ completed
+✓ test_task ..................... completed
+✓ review_task ................... completed
+⚠ merge ........................ blocked (human approval required)
+```
+
+</details>
+
+---
+
+## ⚖️ Why Not X?
+
+Instead of adopting standalone agents that operate as black boxes, **01-monorepo** integrates AI into a strict engineering pipeline with deterministic execution.
+
+<table>
+<tr>
+<th width="25%">Compared to</th>
+<th width="25%">Their approach</th>
+<th width="25%">Our approach</th>
+<th width="25%">Key difference</th>
+</tr>
+<tr>
+<td><b>Claude Code / Cursor / Copilot Workspace</b></td>
+<td>Powerful but opaque, closed environments</td>
+<td>Open, customizable orchestration layer</td>
+<td>You own the memory, the event bus, and the CI integration</td>
+</tr>
+<tr>
+<td><b>AutoGen</b></td>
+<td>Open-ended multi-agent conversations</td>
+<td>Deterministic DAGs with fixed agent roles</td>
+<td>No infinite loops. Agents execute nodes, they don't chat</td>
+</tr>
+<tr>
+<td><b>CrewAI</b></td>
+<td>Role-based agents with flexible execution</td>
+<td>CI-authoritative pipeline with guardrail enforcement</td>
+<td>CI is the source of truth, not agent self-reporting</td>
+</tr>
+<tr>
+<td><b>LangGraph</b></td>
+<td>Graph-based agent orchestration framework</td>
+<td>Redis-backed DAG scheduler as a separate service</td>
+<td>State persists independently. Scheduler is decoupled from agents</td>
+</tr>
+<tr>
+<td><b>Dify</b></td>
+<td>Visual workflow builder for LLM apps</td>
+<td>Code-first engineering workspace with audit trails</td>
+<td>Built for software delivery, not chatbot building</td>
+</tr>
+</table>
+
+---
+
+## 🚦 Model Routing
+
+Four distinct execution lanes balance **power**, **privacy**, and **cost**:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         MODEL ROUTING                              │
+├──────────────┬──────────────────────┬───────────────────────────────┤
+│ Lane         │ Engine               │ Scope                        │
+├──────────────┼──────────────────────┼───────────────────────────────┤
+│ Primary      │ Codex CLI            │ Implementation & edits        │
+│ Reasoning    │ Claude Code CLI      │ Architecture, planning, debug │
+│ Helper       │ Ollama qwen3.5:9b    │ Cheap bounded tasks only      │
+│ IDE          │ Antigravity          │ Workflow consumer, not auth   │
+└──────────────┴──────────────────────┴───────────────────────────────┘
+```
+
+> [!CAUTION]
+> **Local Model Policy:** The local 9B model is **never** used for production code generation, authentication logic, CI decisions, merge authority, security reviews, or scheduler state transitions. Its output is advisory until validated by CI.
+
+See [Model Routing](./docs/model-routing.md) · [Local Model Policy](./docs/local-model-policy.md)
+
+---
+
+## 🛡️ Guardrails
+
+<details>
+<summary><b>Enforced in code today</b> (click to expand)</summary>
+
+- Cross-agent coordination goes through **Redis Streams only**
+- Direct agent-to-agent calls are **forbidden**
+- Task ownership is enforced per agent role (`planner`, `coder`, `tester`, `reviewer`)
+- Invalid status transitions are **rejected and audited**
+- `coder` cannot modify tests or CI config
+- `tester` can only modify tests and fixtures
+- `reviewer` may block but cannot mutate code
+- Merge cannot complete without **recorded human approval**
+- Trusted-source checks on `human_approval_gate`, `merge_task`, `rerun_ci`
+- Duplicate events are **ignored idempotently**
+- Raw conversation payloads are **rejected at runtime**
+- Filesystem scope and terminal allowlists with audit artifacts
+
+</details>
+
+### Non-Negotiable Rules
+
+| Rule | Rationale |
+|:---|:---|
+| No task may bypass CI | CI is the single source of truth |
+| No merge without human approval | Prevents unsupervised code shipping |
+| No raw transcripts in durable memory | Keeps memory clean and reusable |
+| No agent mutation outside repo scope | Prevents filesystem pollution |
+| No fake success to replace CI outcomes | Agents cannot self-report passing |
+| No destructive action without approval | Explicit consent for dangerous ops |
+
+---
+
+## 📁 Project Structure
+
+```
 01-monorepo/
-├── .agent/        # local skills, workflows, memory assets, vendored catalogs
-├── .claude/       # Claude-specific project memory/instructions
-├── .codex/        # Codex-specific memory/rules
-├── .context/      # generated project context and reusable docs
-├── bootstrap/     # Windows + WSL bootstrap and healthcheck scripts
-├── docs/          # human-authored architecture and operations docs
-├── env/           # environment templates and examples
-├── guardrails/    # rule files consumed by runtime/scheduler
-├── projects/      # target repositories for future execution
-└── workspace/
-    ├── agents/
-    ├── config/
-    ├── event_bus/
-    ├── gateway/
-    ├── guardrails/
-    ├── langgraph/
-    ├── memory/
-    ├── providers/
-    ├── runtime/
-    ├── scheduler/
-    └── tools/
+├── .agent/                    # Shared skills, workflows, memory
+│   ├── skills/                # Reusable agent skills library
+│   ├── workflows/             # Workflow definitions (e.g., /git)
+│   └── memory/                # Tool-agnostic durable notes
+├── .claude/                   # Claude-specific rules & memory
+├── .codex/                    # Codex-specific instructions
+├── .context/                  # Runtime context & venv
+├── .gitea/                    # Gitea CI/CD workflows
+├── bootstrap/                 # Local validation & setup scripts
+├── docs/                      # Architecture, routing, runbooks
+├── guardrails/                # Machine-readable guardrail rules
+├── projects/                  # Target repositories
+└── workspace/                 # The runtime engine
+    ├── agents/                # Agent implementations
+    ├── config/                # Runtime configuration
+    ├── event_bus/             # Redis Streams integration
+    ├── gateway/               # Model gateway & routing
+    ├── memory/                # Memory runtime service
+    ├── providers/             # LLM provider adapters
+    ├── runtime/               # Assistant runtime bootstrap
+    ├── scheduler/             # DAG scheduler & guardrail enforcer
+    └── tools/                 # Tool contracts & policies
 ```
 
-## Quick start
+---
 
-### Recommended environment
+## 📜 Instruction Hierarchy
 
-For the best developer experience, use this repository from **WSL Ubuntu 24.04**. OpenAI’s Codex IDE guidance recommends WSL workspaces for the best Windows experience. ([OpenAI Developers][4])
+Instructions are separated by audience. Each layer is consistent with the one above it:
 
-### Bootstrap
-
-Run the local bootstrap / healthcheck flow from `bootstrap/`.
-
-### Validate Python code
-
-```bash
-python -m compileall workspace docs
+```
+AGENTS.md          ← Canonical Codex-facing contract
+CLAUDE.md          ← Claude-facing reasoning layer
+.claude/CLAUDE.md  ← Curated durable memory
+.agent/            ← Shared skills & workflows
+GUARDRAILS.md      ← Operator-facing safety model
+WORKSPACE.md       ← Runtime boundaries & ownership
 ```
 
-### Run scheduler tests
+---
 
-```bash
-python -m unittest workspace.scheduler.test_orchestration -v
+## 🛡️ Gitea PR Gate
+
+All changes to `main` must pass through the full validation chain:
+
+```
+feature branch → PR → CI green → human approval → merge
 ```
 
-### Redis-backed integration tests
+CI checks include: `ruff` · `mypy` · `pytest` (unit) · `pytest` (Redis integration)
 
-See the docs for the local Redis container flow and the exact commands to run integration coverage.
+See [Gitea PR Validation](./docs/gitea-pr-validation.md) · [Activation Checklist](./docs/gitea-activation-checklist.md)
 
-## Event model
+---
 
-Required Redis Streams:
+## 🎯 Current Maturity
 
-* `agent_tasks`
-* `agent_results`
-* `ci_events`
-* `memory_events`
-* `system_events`
+**Release Candidate — Local Controlled Operation**
 
-Base event envelope:
+This repository is not a prototype. It enforces:
 
-```json
-{
-  "event_type": "string",
-  "event_id": "uuid",
-  "timestamp": "iso8601",
-  "source": "planner|coder|tester|reviewer|scheduler|ci|system",
-  "correlation_id": "uuid",
-  "payload": {}
-}
-```
+- ✅ Real runtime guardrails with code-backed rejection
+- ✅ Trusted-source execution for critical system tasks
+- ✅ Structured audit logging on every scheduler decision
+- ✅ Local validation with deterministic replay
+- ✅ Strict PR gating with human approval enforcement
 
-## Guardrails
+It intentionally does *not* behave like a fully autonomous production platform. That is a feature.
 
-This repository enforces these core boundaries:
+See [Release Candidate Status](./docs/release-candidate.md)
 
-* AI-generated code is untrusted until validated
-* No direct push to main
-* Required path:
-  `branch → commit → CI → review → human approval → merge`
-* No direct agent-to-agent calls
-* No raw conversation logs in long-term memory
-* Coder cannot own tests
-* Tester cannot weaken tests to force green CI
-* Reviewer may block progression
-* Protected system tasks require trusted sources
+---
 
-See:
+## 📚 Documentation
 
-* `GUARDRAILS.md`
-* `docs/architecture.md`
-* `workspace/scheduler/README.md`
+| Document | Description |
+|:---|:---|
+| [Architecture](./docs/architecture.md) | Full system design, event schemas, DAG model |
+| [Model Routing](./docs/model-routing.md) | Four-lane execution model |
+| [Local Model Policy](./docs/local-model-policy.md) | Qwen 9B boundaries and restrictions |
+| [Scheduler](./docs/scheduler.md) | DAG engine, retries, dead-letter handling |
+| [Guardrails](./GUARDRAILS.md) | Safety model and enforcement details |
+| [Workspace](./WORKSPACE.md) | Runtime boundaries and ownership |
+| [Local Validation](./docs/local-validation.md) | Running the controlled flow locally |
+| [Gitea PR Validation](./docs/gitea-pr-validation.md) | PR gate workflow and CI config |
+| [CLI Auth & MCP](./docs/cli-auth-and-mcp.md) | Authentication and MCP setup |
+| [Contributing](./CONTRIBUTING.md) | How to contribute to this project |
 
-## Current maturity
+---
 
-This repository is best described as:
+<div align="center">
 
-**pre-production with a real orchestration core**
+<br>
 
-It already contains real stateful orchestration, runtime guardrails, audit logging, and CI-aware task progression. It is not just a scaffold, but it is also not yet a fully hardened production platform.
+**AI should accelerate software delivery without dissolving engineering discipline.**
 
-## Next milestones
+*That's what this repository is built for.*
 
-1. Replace remaining placeholder LangGraph execution paths
-2. Harden tool execution with policy + artifact capture
-3. Exercise the local Gitea/Argo loop end-to-end
-4. Expand observability and audit inspection flows
-5. Evolve long-term memory beyond the current Redis-backed sink
+<br>
 
-## Contributing
+---
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, validation, and doc update expectations.
+<sub>Built with discipline by engineers who believe AI is a tool, not a replacement.</sub>
+
+</div>

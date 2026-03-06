@@ -1,4 +1,5 @@
 # Coder Agent
 
-Owns implementation work and produces scoped code changes.
+> Last Updated: 06/03/2026
 
+Owns implementation work and produces scoped code changes.

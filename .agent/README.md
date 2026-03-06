@@ -1,18 +1,23 @@
 # Agent Workspace Assets
 
-This directory now separates local workspace assets from vendored third-party catalogs.
+> Last Updated: 2026-03-06
+
+This directory is the shared agent layer for Codex, Claude-compatible workflows, and Antigravity. Keep it tool-agnostic where possible.
 
 ## Layout
 
-- `skills/` — curated local skills used directly by this workspace.
-- `catalogs/` — vendored external skill repositories kept intact to preserve upstream structure.
-- `backups/` — dated backups and migration leftovers kept for recovery.
-- `workflows/` — Antigravity workflow entrypoints; the basename maps to the slash command, for example `git.md` -> `/git`.
-- `memory/` — lightweight agent-local memory notes.
+- `skills/` — curated workspace-owned skills.
+- `catalogs/` — vendored third-party skill repositories kept intact as references, not default load paths.
+- `workflows/` — shared workflow playbooks. Antigravity consumes them directly; Codex and Claude can follow them manually.
+- `memory/` — short tool-agnostic notes and distilled reminders.
+- `rules/` — workspace-owned operating rules such as `/git`.
+- `backups/` — recovery material only.
 
 ## Conventions
 
-- Prefer placing workspace-owned skills directly under `skills/<skill-name>/SKILL.md`.
-- Keep vendored catalogs intact under `catalogs/` instead of flattening their internal structure into the workspace root.
-- Treat `backups/` as recovery material, not an active load path.
-- If the skill router changes, keep `.agent/skills/` first and vendor catalogs as fallback sources.
+- Put workspace-owned skills under `skills/<skill-name>/SKILL.md`.
+- Keep vendored catalogs under `catalogs/` without flattening them into the active skill tree.
+- Select a category first and load one relevant skill when possible.
+- Do not bulk-load skills or catalogs into model context.
+- Summarize generated context before passing it onward.
+- `.agent/memory/` is shared and tool-agnostic. `.claude/memory/` is Claude-specific durable project memory.

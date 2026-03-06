@@ -468,6 +468,17 @@ class SchedulerOrchestrationTests(unittest.TestCase):
         self.assertTrue(report["memory"]["no_raw_conversation_storage"])
         self.assertEqual(report["guardrails"]["missing_rules"], [])
 
+    def test_scheduler_health_report_surfaces_operator_signals(self) -> None:
+        runtime = AssistantRuntime(workspace_root=Path("workspace"))
+        runtime.scheduler_service = lambda: self.scheduler  # type: ignore[method-assign]
+        self.scheduler.store.increment_metric("merge_blocks")
+
+        report = runtime.scheduler_health_report()
+
+        self.assertEqual(report["status"], "attention_required")
+        self.assertEqual(report["summary"]["merge_blocks"], 1)
+        self.assertTrue(any("Merge blocks were recorded" in hint for hint in report["operator_hints"]))
+
     def test_coder_cannot_complete_merge_task(self) -> None:
         graph_id = "graph-merge-result"
         merge_task = self.scheduler.builder.build_task_node(

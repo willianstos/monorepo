@@ -9,7 +9,7 @@ Este runbook cobre a validação do scheduler, Redis Streams, autoridade do CI, 
 Inicie a instância Redis dedicada usada por testes de integração e orquestração local:
 
 ```bash
-docker compose -f env/docker-compose.redis.yml up -d redis-integration
+docker compose -f docker-compose.redis.yml up -d redis-integration
 ```
 
 Execute os testes de integração com Redis:

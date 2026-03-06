@@ -55,7 +55,7 @@ scaffoldVersion: "2.0.0"
 ## Expectativas de Validação
 
 - Execute `python -m pytest` para qualquer mudança de código.
-- Inicie o Redis com `docker compose -f env/docker-compose.redis.yml up -d redis-integration` antes de executar testes de integração.
+- Inicie o Redis com `docker compose -f docker-compose.redis.yml up -d redis-integration` antes de executar testes de integração.
 - Execute `ruff check` e `mypy` para mudanças estruturais em Python.
 - Para mudanças apenas de documentação, declare que a validação foi pulada ou limitada.
 

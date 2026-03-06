@@ -19,5 +19,4 @@ class RetrievedMemory(TypedDict):
     summary: str
     confidence: float
     tags: list[str]
-    source_layer: Literal["semantic_memory", "structured_memory", "recent_sessions"]
-
+    source_layer: Literal["structured_memory", "recent_sessions"]

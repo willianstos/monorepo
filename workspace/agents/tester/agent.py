@@ -3,7 +3,7 @@ from workspace.agents.base import AgentSpec
 SPEC = AgentSpec(
     name="tester",
     mission="Own tests and fixtures and validate behavior for the change set.",
-    model_profile="verification",
+    model_profile="testing",
     responsibilities=(
         "Create or update tests and fixtures when required.",
         "Select and run appropriate validation checks.",

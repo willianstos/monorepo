@@ -23,11 +23,9 @@ class GatewayRequestHandler(BaseHTTPRequestHandler):
                     "object": "list",
                     "data": [
                         {"id": "auto", "object": "model"},
-                        {"id": "local:qwen3.5-9b", "object": "model"},
+                        {"id": "local:qwen3.5:9b", "object": "model"},
                         {"id": "codex-cli", "object": "model"},
                         {"id": "claude-code", "object": "model"},
-                        {"id": "gemini", "object": "model"},
-                        {"id": "openai", "object": "model"},
                     ],
                 },
             )

@@ -21,7 +21,6 @@ class TaskExecutor:
     event_streams: tuple[str, ...] = ALL_STREAMS
     memory_flush_required: bool = True
     memory_retrieval_strategy: tuple[str, ...] = (
-        "semantic_memory",
         "structured_memory",
         "recent_sessions",
     )

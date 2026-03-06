@@ -1,5 +1,7 @@
 # Environment
 
+> Last Updated: 06/03/2026
+
 This directory stores auditable environment templates for the monorepo and for the local hybrid Windows + WSL platform contract.
 
 Current intent:

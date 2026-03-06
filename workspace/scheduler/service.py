@@ -101,6 +101,7 @@ class SchedulerService:
             return {
                 **self.store.load_metrics_snapshot(),
                 "processed_event_count": self.store.processed_event_count(),
+                "connection_available": True,
                 "connection_error": None,
             }
         except Exception as exc:  # noqa: BLE001
@@ -108,6 +109,7 @@ class SchedulerService:
                 "metrics": {},
                 "throughput": {},
                 "processed_event_count": 0,
+                "connection_available": False,
                 "connection_error": str(exc),
             }
 

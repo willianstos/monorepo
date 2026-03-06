@@ -14,7 +14,8 @@ env/*.local
 .context/runs/
 .agent/backups/
 .agent/catalogs/
-.agent/skills/
+.agent/skills/*
+!.agent/skills/README.md
 *.egg-info/
 .coverage
 htmlcov/
@@ -22,6 +23,21 @@ htmlcov/
 .nox/
 dist/
 build/
+# Logs
+logs/
+*.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp / swap / backup
+*.tmp
+*.swp
+*.bak
+
+# Project-specific secrets
 workspace/gateway/usage.log
 claude_secrets.json
 claude_wsl_secrets.json

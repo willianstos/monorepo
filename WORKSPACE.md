@@ -1,44 +1,61 @@
 # Workspace Conventions
 
+> Last Updated: 2026-03-06
+
 ## Purpose
 
-The monorepo separates shared orchestration runtime from concrete target projects:
+The monorepo separates the shared assistant runtime from target projects and operator-facing guidance:
 
-- `workspace/`: shared multi-agent runtime, graph blueprints, providers, tools, and memory adapters.
-- `projects/`: projects the agent system can inspect and modify.
-- `.agent/`: local agent skills, vendored skill catalogs, workflow definitions, backups, and agent-local memory notes.
-- `env/`: environment templates and deployment-local configuration assets.
-- `bootstrap/`: idempotent host and WSL bootstrap plus healthcheck scripts.
-- `docs/`: human-readable architecture and operating documentation.
+- `workspace/`: shared runtime, scheduler integration, providers, tools, and memory adapters.
+- `projects/`: target repositories the workspace may inspect and modify.
+- `.agent/`: shared skills, workflows, and tool-agnostic memory notes.
+- `.claude/`: Claude-specific rules and curated durable project memory.
+- `docs/`: human-authored architecture, routing, policy, and operating documentation.
+- `guardrails/`: machine-readable repository policy files.
 
-## Architectural Rules
+## Fixed Architectural Rules
 
-- Shared agent orchestration logic lives under `workspace/`.
-- Provider-specific LLM wiring lives under `workspace/providers/`.
-- Runtime bootstrapping and task coordination live under `workspace/runtime/`.
-- Declarative agent/model/tool settings live under `workspace/config/`.
-- Target business applications live under `projects/`.
-- Agent nodes may coordinate tools, but tool adapters remain isolated in `workspace/tools/`.
-- Cross-agent coordination must move through Redis Streams and Redis-backed scheduler state, not implicit globals.
-- Project-specific behavior should be configured, not hardcoded into the graph.
+- The scheduler is a separate service.
+- Redis Streams is the only event and task bus.
+- DAG state persists in Redis.
+- Agents communicate only through events.
+- Primary execution agents remain `planner`, `coder`, `tester`, and `reviewer`.
+- CI is authoritative.
+- Merge to `main` requires human approval after CI passes.
+- Local-first routing is preserved without giving the local helper model coding authority.
+
+## Model And Tool Boundaries
+
+- Codex owns primary implementation and repo edits.
+- Claude owns primary planning, architecture, deep debugging, and review assistance.
+- Ollama `qwen3.5:9b` is limited to bounded helper tasks such as classification, routing, summarization, extraction, and memory distillation.
+- Provider choice should stay declarative through `workspace/config/`, not hardcoded through ad hoc prompts.
+- Tool adapters stay isolated in `workspace/tools/`, and tool use remains repo-scoped and auditable.
+
+## Memory Standard
+
+- Working memory: transient task state.
+- Session memory: recent continuity.
+- Runtime durable memory: distilled structured records on the Redis-backed runtime path.
+- Human and Claude durable memory: `.claude/memory/*.md`.
+- Shared tool-agnostic notes: `.agent/memory/`.
+- Raw conversations, prompt dumps, and raw logs do not belong in durable memory.
 
 ## Operating Model
 
-- The default happy path is `issue_created -> planner -> coder -> tester -> reviewer -> human approval -> merge`.
-- Provider choice should remain swappable through model profiles, not hardcoded in agent code.
-- CI failures already route into scheduler-managed fix loops before review and merge can proceed.
-- Reviewer failures and rejected human approval already block graph progression instead of silently retrying.
-- Scheduler event handling is now idempotent by persisted event ID, with `audit_log` emitted for duplicate suppression and rejected transitions.
-- Runtime memory writes now enforce structured `MemoryRecord` payloads and reject raw transcript-style fields on the write path.
-- Minimal Redis-backed observability is available through scheduler metrics and runtime health snapshots.
-- Several LangGraph agent nodes still behave like placeholders even though the scheduler/event bus layer is implemented.
-- Every tool action should still become fully auditable, replayable, and policy-checked.
-- Memory still needs richer long-term storage and retrieval beyond the current Redis-backed runtime sink.
+- Default flow is `issue_created -> planner -> coder -> tester -> reviewer -> human approval -> merge`.
+- CI failures route into scheduler-managed fix loops before review and merge can continue.
+- Reviewer failures and rejected human approval block graph progression.
+- Local repository wrap-up still requires a `/git` checkpoint on the active feature branch before work is reported complete.
+- `/git` defaults to checkpoint-and-push on the feature branch. Merge into `main` stays explicit and gated.
+- LangGraph remains descriptive here; the scheduler, event bus, and guardrails are the implemented authority.
+- Gitea Actions enforces the PR validation gate: lint, types, unit tests, and Redis integration tests must pass before merge is available. See [`docs/gitea-pr-validation.md`](./docs/gitea-pr-validation.md).
 
 ## Editing Guide
 
-- Edit `README.md` when the repository overview or next-build narrative changes.
-- Edit `WORKSPACE.md` when ownership boundaries or orchestration rules change.
-- Edit `GUARDRAILS.md` and `guardrails/` together when agent safety policy changes.
-- Edit `bootstrap/` when host, WSL, Git, Docker, or Gitea bootstrap flows change.
-- Edit `.context/` when adding reusable documentation, agent playbooks, or generated artefacts for future runs.
+- Edit `AGENTS.md` when Codex-facing repository rules change.
+- Edit `CLAUDE.md` and `.claude/` when Claude-facing rules or durable memory structure changes.
+- Edit `README.md` when the repo overview, maturity, or operator entrypoints change.
+- Edit `WORKSPACE.md` when runtime ownership or orchestration boundaries change.
+- Edit `GUARDRAILS.md` and `guardrails/` together when safety policy changes.
+- Edit `.context/` indexes when adding new operator docs or playbooks.

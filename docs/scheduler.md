@@ -1,8 +1,10 @@
 # Scheduler
 
+> Last Updated: 06/03/2026
+
 ## Purpose
 
-The scheduler is the orchestration service for the AI Software Factory. It is separate from agents and separate from the local model gateway.
+The scheduler is the orchestration service for the local-first AI coding assistant workspace. It is separate from agents and separate from the local model gateway.
 
 The current implementation runs an event loop over Redis Streams, rebuilds workflow state from Redis, and enforces guardrails before dispatch and before task state transitions.
 
@@ -73,6 +75,7 @@ The scheduler never merges automatically.
 
 When the DAG reaches `human_approval_gate`, the scheduler publishes `human_approval_required` to `system_events` and waits for an external completion event before releasing `merge_task`.
 If the approval result is anything other than `approved`, the graph remains blocked and `merge_task` stays undispatched.
+Local `/git` checkpoints on feature branches do not bypass this merge gate.
 
 Trusted approval completion must use:
 
@@ -106,7 +109,7 @@ The scheduler emits `audit_log` for accepted and rejected transitions, guardrail
 - processed scheduler event IDs are persisted in Redis and duplicates are ignored before state mutation
 - scheduler counters live in `scheduler:metrics`
 - per-stage throughput lives in `scheduler:throughput`
-- `AssistantRuntime.scheduler_health_report()` returns a lightweight snapshot of those counters
+- `AssistantRuntime.scheduler_health_report()` returns an operator-friendly snapshot of those counters plus backlog and blocking hints
 
 ## Runtime Memory Path
 
@@ -129,6 +132,7 @@ The scheduler enforces:
 - reviewer may block progression
 - CI cannot be bypassed
 - merge requires human approval
+- feature-branch Git checkpoints remain an operator workflow, but are not yet machine-attested by the scheduler
 - system-owned tasks require trusted completion sources
 - direct agent-to-agent calls are forbidden
 - push to `main` is forbidden

@@ -1,69 +1,62 @@
 # Guardrails
 
-This file explains the repository safety model in plain language.
+> Last Updated: 2026-03-06
 
-The machine-readable policy lives under `guardrails/`.
-The current code-backed enforcement lives primarily in:
+This file explains the repository safety model in plain language. Machine-readable rule files live in `guardrails/`. Active code-backed enforcement lives mainly in:
 
 - `workspace/scheduler/guardrail_enforcer.py`
 - `workspace/scheduler/service.py`
-- `workspace/scheduler/dispatcher.py`
+- `workspace/memory/runtime_service.py`
+- `workspace/tools/`
+- `workspace/providers/` and `workspace/gateway/` for model routing defaults
 
-## Enforced Today
+## Enforced In Code Today
 
-These controls are already enforced in the active scheduler path:
+- Cross-agent coordination goes through Redis Streams only.
+- Direct agent-to-agent calls are forbidden.
+- Task ownership is enforced for `planner`, `coder`, `tester`, `reviewer`, and system-owned tasks.
+- Invalid task status transitions are rejected and audited.
+- `coder` may not modify tests or CI configuration.
+- `tester` may modify tests and fixtures only.
+- `reviewer` may block progression and may not mutate code as part of review.
+- Review, approval, and merge remain CI-gated.
+- Merge cannot complete without recorded human approval metadata.
+- Trusted source checks apply to `human_approval_gate`, `merge_task`, and `rerun_ci`.
+- Duplicate scheduler events are ignored before state mutation and recorded in `audit_log`.
+- Raw conversation-style memory payloads are rejected at runtime.
+- Filesystem scope and terminal allowlists are enforced by local tool contracts, with audit artifacts written under `.context/tool-audit/`.
 
-- cross-agent coordination must go through Redis Streams
-- direct agent-to-agent calls are forbidden
-- task dispatch requires dependency readiness
-- task ownership is enforced for planner, coder, tester, and reviewer work
-- invalid task status transitions are rejected
-- coder may not modify tests
-- coder may not modify CI configuration
-- tester may modify tests and fixtures only
-- reviewer may block graph progression
-- CI-gated tasks stay blocked until CI passes
-- merge dispatch requires recorded human approval
-- retry budgets and dead-letter handling require human attention after repeated failure
-- trusted completion sources are enforced for `human_approval_gate`, `merge_task`, and `rerun_ci`
-- duplicate scheduler events are ignored before state mutation and recorded in `audit_log`
-- raw memory payload validation is enforced in the runtime write path, not only in dry-run checks
-- structured `audit_log` events are emitted for transition acceptance/rejection, CI handling, merge-gate blocks, and memory rejections
+## Repository Policy That Must Remain True
 
-## Remaining Gaps
+- Local model misuse is a policy violation.
+- Ollama `qwen3.5:9b` is helper-only and non-authoritative.
+- `qwen3.5:9b` must not own final code generation, auth or secrets changes, migrations, CI edits, guardrail design, merge decisions, review sign-off, or scheduler authority.
+- CI is authoritative. Agents may not replace CI outcomes with self-reported success.
+- Merge to `main` always requires both passing CI and explicit human approval.
+- Raw conversations must never enter durable memory.
+- Tool use must stay bounded, auditable, and scoped to the selected repository.
+- Test weakening is forbidden.
 
-These controls still need additional hardening beyond the current backlog:
+## Current Enforcement Edge
 
-- tool execution policy and filesystem scope control still need runtime enforcement beyond documentation and contracts
-- prompt, action, and artifact audit logs are not yet complete enough for full production incident analysis
-- secrets handling rules exist, but end-to-end redaction and storage controls are not fully wired
+- Model authority is enforced today through routing defaults, gateway exposure, repository instructions, and config policy. The scheduler does not yet inspect model provenance on every event.
+- Tool policy is enforced locally in tool contracts, not yet as a centralized scheduler-wide policy plane.
+- Audit trails are strong for scheduler and memory paths, but not yet complete for every prompt, action, and artifact boundary.
 
-## Non-Negotiable Policy
+## Remaining Gaps Before Production-Hardened
 
-- no task may bypass CI as the source of truth
-- no task may merge to `main` without human approval
-- no raw conversation transcript belongs in long-term memory
-- no agent should mutate files outside the selected repository scope
-- no agent should publish fake success to replace CI outcomes
-- no destructive or privileged action should happen without an explicit approval path
+- Full external validation against real code-host and CI boundaries.
+- Broader tool telemetry in `system_events`, not only local artifact files.
+- Stronger secrets redaction and storage review across the full runtime surface.
+- Stronger checkpoint attestation and broader operator observability.
 
-## Operational Layers
+## Non-Negotiable Rules
 
-- `guardrails/*.rules`
-  Narrative and machine-readable policy source.
-- scheduler validation
-  Dispatch, result, and transition checks before the graph advances.
-- CI authority
-  Argo publishes CI results and the scheduler reacts to them instead of inferring pass/fail from agent output.
-- dead-letter and alerting
-  Repeated failure or invalid transitions move work into human-attention territory.
+- No task may bypass CI as the source of truth.
+- No task may merge to `main` without human approval.
+- No raw conversation transcript belongs in durable memory.
+- No agent should mutate files outside the selected repository scope.
+- No agent should publish fake success to replace CI outcomes.
+- No destructive or privileged action should happen without an explicit approval path.
 
-## Production Readiness Standard
-
-Before calling this production-ready, the repository should have:
-
-- audited tool execution with durable logs
-- deeper Gitea and Argo integration validation beyond the current local scaffolding
-- richer observability beyond the current Redis counters and hashes
-
-The goal is simple: guardrails should be true because code enforces them, not because docs claim them.
+The intent remains simple: repository rules should be auditable, minimal, and increasingly code-enforced rather than hidden in prompts.
