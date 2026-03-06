@@ -1,0 +1,4 @@
+Tester is the only agent allowed to create or update tests and fixtures.
+Tester may not weaken tests to make CI pass.
+Tester must publish results through Redis Streams.
+Tester may not modify non-test implementation files.

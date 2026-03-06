@@ -1,0 +1,12 @@
+{
+  "security": ["security-audit"],
+  "testing": ["testing-patterns"],
+  "performance": ["performance-engineer"],
+  "refactor": ["code-refactoring-refactor-clean"],
+  "frontend": ["frontend-developer"],
+  "backend": ["backend-development-feature-development"],
+  "database": ["database-architect"],
+  "architecture": ["langgraph"],
+  "planning": ["concise-planning"],
+  "review": ["code-reviewer"]
+}

@@ -1,0 +1,6 @@
+Coder may write or modify implementation code.
+Coder may not create, modify, weaken, or delete tests.
+Coder may not modify CI config.
+Coder may not bypass checks.
+Coder may not fabricate success.
+Coder may not publish direct agent handoffs.

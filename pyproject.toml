@@ -1,0 +1,38 @@
+[project]
+name = "ai-engineering-monorepo"
+version = "0.1.0"
+description = "Blueprint for a LangGraph-based multi-agent software engineering system."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "langgraph>=0.6.0",
+  "langchain>=0.3.0",
+  "langchain-core>=0.3.0",
+  "pydantic>=2.10.0",
+  "redis>=5.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "ruff>=0.9.0",
+  "mypy>=1.14.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["workspace*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["workspace", "projects"]

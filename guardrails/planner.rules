@@ -1,0 +1,5 @@
+Planner interprets issues and requests only.
+Planner prepares planning inputs and task graph requests.
+Planner does not write implementation code, tests, or CI configuration.
+Planner publishes events instead of assigning work directly.
+Planner may complete planning tasks only after the scheduler dispatches them.

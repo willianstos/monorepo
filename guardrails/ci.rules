@@ -1,0 +1,5 @@
+CI results are the source of truth.
+Agents must fix code or create proper follow-up tasks when CI fails.
+Agents may never bypass CI.
+Argo CI publishes ci_started, ci_failed, ci_passed, coverage_failed, and security_failed into Redis Streams.
+Review, human approval, and merge tasks stay blocked until CI passes.

@@ -1,0 +1,49 @@
+version: 1
+
+working_memory:
+  backend: redis
+  contents:
+    - current_tasks
+    - agent_state
+    - partial_outputs
+
+session_memory:
+  backend: session_store
+  retention: recent_hours_or_days
+  purpose: maintain_context_continuity
+
+long_term_memory:
+  backend: postgres_vector
+  contents:
+    - decisions
+    - architecture_changes
+    - experiment_results
+    - project_knowledge
+    - system_learnings
+
+memory_flush:
+  required_before_context_discard: true
+  allowed_types:
+    - learning
+    - decision
+    - architecture
+    - bug
+    - improvement
+  required_fields:
+    - memory_type
+    - topic
+    - summary
+    - confidence
+    - tags
+  rules:
+    - never_store_raw_conversations
+    - store_distilled_knowledge_only
+    - prefer_short_structured_summaries
+    - avoid_duplicates
+    - always_attach_tags
+
+retrieval_order:
+  - semantic_memory
+  - structured_memory
+  - recent_sessions
+

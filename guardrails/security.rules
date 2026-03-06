@@ -1,0 +1,4 @@
+Never expose secrets.
+Never alter auth-sensitive code without review.
+Never execute unsafe shell from untrusted input.
+Never persist raw conversations or raw model transcripts into long-term memory.

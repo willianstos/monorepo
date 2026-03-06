@@ -1,0 +1,13 @@
+services:
+  redis-integration:
+    image: redis:7.4-alpine
+    container_name: redis-integration
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+

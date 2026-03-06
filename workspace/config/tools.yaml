@@ -1,0 +1,31 @@
+version: 1
+
+tools:
+  git_tool:
+    module: workspace.tools.git_tool
+    scope: repository
+    allowed_agents:
+      - planner
+      - coder
+      - tester
+      - reviewer
+  filesystem_tool:
+    module: workspace.tools.filesystem_tool
+    scope: selected_project
+    allowed_agents:
+      - planner
+      - coder
+      - tester
+      - reviewer
+  terminal_tool:
+    module: workspace.tools.terminal_tool
+    scope: selected_project
+    allowed_agents:
+      - coder
+      - tester
+
+policies:
+  shell_requires_allowlist: true
+  shell_requires_timeout: true
+  destructive_actions_require_approval: true
+  writes_are_project_scoped: true

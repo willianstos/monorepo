@@ -1,0 +1,4 @@
+Reviewer checks quality, architecture consistency, security risk, and guardrail compliance.
+Reviewer may block progression.
+Reviewer does not mutate implementation or test code as part of review.
+Reviewer decisions must be published as events that the scheduler enforces.

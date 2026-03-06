@@ -1,0 +1,554 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-03-05T23:56:57.471Z",
+  "stack": {
+    "primaryLanguage": "python",
+    "languages": [
+      "python"
+    ],
+    "frameworks": [],
+    "buildTools": [],
+    "testFrameworks": [],
+    "packageManager": null,
+    "isMonorepo": false,
+    "hasDocker": false,
+    "hasCI": false
+  },
+  "structure": {
+    "totalFiles": 98,
+    "rootPath": ".",
+    "topDirectories": [
+      {
+        "name": "docs",
+        "fileCount": 1,
+        "description": "Documentation files"
+      },
+      {
+        "name": "env",
+        "fileCount": 1,
+        "description": "Module directory"
+      },
+      {
+        "name": "projects",
+        "fileCount": 2,
+        "description": "Project definitions"
+      },
+      {
+        "name": "workspace",
+        "fileCount": 90,
+        "description": "Module directory"
+      }
+    ],
+    "languageDistribution": [
+      {
+        "extension": ".py",
+        "count": 37
+      },
+      {
+        "extension": ".pyc",
+        "count": 37
+      },
+      {
+        "extension": ".md",
+        "count": 20
+      },
+      {
+        "extension": ".yaml",
+        "count": 3
+      },
+      {
+        "extension": ".toml",
+        "count": 1
+      }
+    ]
+  },
+  "architecture": {
+    "layers": [
+      {
+        "name": "Controllers",
+        "description": "Request handling and routing",
+        "directories": [
+          "workspace\\langgraph\\nodes"
+        ],
+        "symbolCount": 6,
+        "dependsOn": []
+      },
+      {
+        "name": "Components",
+        "description": "UI components and views",
+        "directories": [
+          "workspace\\langgraph\\nodes",
+          "workspace\\agents\\reviewer"
+        ],
+        "symbolCount": 1,
+        "dependsOn": []
+      }
+    ],
+    "patterns": [],
+    "entryPoints": [],
+    "mainEntryPoints": [],
+    "moduleExports": []
+  },
+  "symbols": {
+    "classes": [
+      {
+        "name": "AgentSpec",
+        "kind": "class",
+        "file": "workspace\\agents\\base.py",
+        "line": 7,
+        "exported": true
+      },
+      {
+        "name": "AnthropicProvider",
+        "kind": "class",
+        "file": "workspace\\providers\\anthropic_provider.py",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "EngineeringGraphState",
+        "kind": "class",
+        "file": "workspace\\langgraph\\state.py",
+        "line": 38,
+        "exported": true
+      },
+      {
+        "name": "FilesystemTool",
+        "kind": "class",
+        "file": "workspace\\tools\\filesystem_tool.py",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "GitTool",
+        "kind": "class",
+        "file": "workspace\\tools\\git_tool.py",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "LangGraphBlueprint",
+        "kind": "class",
+        "file": "workspace\\langgraph\\graph.py",
+        "line": 18,
+        "exported": true
+      },
+      {
+        "name": "LocalProvider",
+        "kind": "class",
+        "file": "workspace\\providers\\local_provider.py",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "ModelHandle",
+        "kind": "class",
+        "file": "workspace\\providers\\__init__.py",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "NodeBlueprint",
+        "kind": "class",
+        "file": "workspace\\langgraph\\graph.py",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "OpenAIProvider",
+        "kind": "class",
+        "file": "workspace\\providers\\openai_provider.py",
+        "line": 10,
+        "exported": true
+      },
+      {
+        "name": "ProviderAdapter",
+        "kind": "class",
+        "file": "workspace\\providers\\__init__.py",
+        "line": 14,
+        "exported": true
+      },
+      {
+        "name": "ReviewRecord",
+        "kind": "class",
+        "file": "workspace\\langgraph\\state.py",
+        "line": 33,
+        "exported": true
+      },
+      {
+        "name": "Runner",
+        "kind": "class",
+        "file": "workspace\\runtime\\runner.py",
+        "line": 9,
+        "exported": true
+      },
+      {
+        "name": "TaskArtifact",
+        "kind": "class",
+        "file": "workspace\\langgraph\\state.py",
+        "line": 26,
+        "exported": true
+      },
+      {
+        "name": "TaskExecutor",
+        "kind": "class",
+        "file": "workspace\\runtime\\task_executor.py",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "TaskMessage",
+        "kind": "class",
+        "file": "workspace\\langgraph\\state.py",
+        "line": 21,
+        "exported": true
+      },
+      {
+        "name": "TerminalTool",
+        "kind": "class",
+        "file": "workspace\\tools\\terminal_tool.py",
+        "line": 7,
+        "exported": true
+      }
+    ],
+    "interfaces": [],
+    "functions": [
+      {
+        "name": "architect_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\architect_node.py",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "build_graph",
+        "kind": "function",
+        "file": "workspace\\langgraph\\graph.py",
+        "line": 86,
+        "exported": true
+      },
+      {
+        "name": "coder_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\coder_node.py",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "devops_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\devops_node.py",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "get_graph_blueprint",
+        "kind": "function",
+        "file": "workspace\\langgraph\\graph.py",
+        "line": 80,
+        "exported": true
+      },
+      {
+        "name": "make_initial_state",
+        "kind": "function",
+        "file": "workspace\\langgraph\\state.py",
+        "line": 67,
+        "exported": true
+      },
+      {
+        "name": "planner_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\planner_node.py",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "reviewer_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\reviewer_node.py",
+        "line": 6,
+        "exported": true
+      },
+      {
+        "name": "route_after_architect",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 12,
+        "exported": true
+      },
+      {
+        "name": "route_after_coder",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 16,
+        "exported": true
+      },
+      {
+        "name": "route_after_devops",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 34,
+        "exported": true
+      },
+      {
+        "name": "route_after_planner",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 8,
+        "exported": true
+      },
+      {
+        "name": "route_after_reviewer",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 27,
+        "exported": true
+      },
+      {
+        "name": "route_after_tester",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\router.py",
+        "line": 20,
+        "exported": true
+      },
+      {
+        "name": "tester_node",
+        "kind": "function",
+        "file": "workspace\\langgraph\\nodes\\tester_node.py",
+        "line": 6,
+        "exported": true
+      }
+    ],
+    "types": [],
+    "enums": []
+  },
+  "publicAPI": [
+    {
+      "name": "AgentSpec",
+      "kind": "class",
+      "file": "workspace\\agents\\base.py",
+      "line": 7,
+      "exported": true
+    },
+    {
+      "name": "AnthropicProvider",
+      "kind": "class",
+      "file": "workspace\\providers\\anthropic_provider.py",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "architect_node",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\architect_node.py",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "build_graph",
+      "kind": "function",
+      "file": "workspace\\langgraph\\graph.py",
+      "line": 86,
+      "exported": true
+    },
+    {
+      "name": "coder_node",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\coder_node.py",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "devops_node",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\devops_node.py",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "EngineeringGraphState",
+      "kind": "class",
+      "file": "workspace\\langgraph\\state.py",
+      "line": 38,
+      "exported": true
+    },
+    {
+      "name": "FilesystemTool",
+      "kind": "class",
+      "file": "workspace\\tools\\filesystem_tool.py",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "get_graph_blueprint",
+      "kind": "function",
+      "file": "workspace\\langgraph\\graph.py",
+      "line": 80,
+      "exported": true
+    },
+    {
+      "name": "GitTool",
+      "kind": "class",
+      "file": "workspace\\tools\\git_tool.py",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "LangGraphBlueprint",
+      "kind": "class",
+      "file": "workspace\\langgraph\\graph.py",
+      "line": 18,
+      "exported": true
+    },
+    {
+      "name": "LocalProvider",
+      "kind": "class",
+      "file": "workspace\\providers\\local_provider.py",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "make_initial_state",
+      "kind": "function",
+      "file": "workspace\\langgraph\\state.py",
+      "line": 67,
+      "exported": true
+    },
+    {
+      "name": "ModelHandle",
+      "kind": "class",
+      "file": "workspace\\providers\\__init__.py",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "NodeBlueprint",
+      "kind": "class",
+      "file": "workspace\\langgraph\\graph.py",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "OpenAIProvider",
+      "kind": "class",
+      "file": "workspace\\providers\\openai_provider.py",
+      "line": 10,
+      "exported": true
+    },
+    {
+      "name": "planner_node",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\planner_node.py",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "ProviderAdapter",
+      "kind": "class",
+      "file": "workspace\\providers\\__init__.py",
+      "line": 14,
+      "exported": true
+    },
+    {
+      "name": "reviewer_node",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\reviewer_node.py",
+      "line": 6,
+      "exported": true
+    },
+    {
+      "name": "ReviewRecord",
+      "kind": "class",
+      "file": "workspace\\langgraph\\state.py",
+      "line": 33,
+      "exported": true
+    },
+    {
+      "name": "route_after_architect",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 12,
+      "exported": true
+    },
+    {
+      "name": "route_after_coder",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 16,
+      "exported": true
+    },
+    {
+      "name": "route_after_devops",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 34,
+      "exported": true
+    },
+    {
+      "name": "route_after_planner",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "route_after_reviewer",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 27,
+      "exported": true
+    },
+    {
+      "name": "route_after_tester",
+      "kind": "function",
+      "file": "workspace\\langgraph\\nodes\\router.py",
+      "line": 20,
+      "exported": true
+    },
+    {
+      "name": "Runner",
+      "kind": "class",
+      "file": "workspace\\runtime\\runner.py",
+      "line": 9,
+      "exported": true
+    },
+    {
+      "name": "TaskArtifact",
+      "kind": "class",
+      "file": "workspace\\langgraph\\state.py",
+      "line": 26,
+      "exported": true
+    },
+    {
+      "name": "TaskExecutor",
+      "kind": "class",
+      "file": "workspace\\runtime\\task_executor.py",
+      "line": 8,
+      "exported": true
+    },
+    {
+      "name": "TaskMessage",
+      "kind": "class",
+      "file": "workspace\\langgraph\\state.py",
+      "line": 21,
+      "exported": true
+    }
+  ],
+  "dependencies": {
+    "mostImported": []
+  },
+  "stats": {
+    "totalSymbols": 32,
+    "exportedSymbols": 32,
+    "analysisTimeMs": 30
+  },
+  "keyFiles": [],
+  "navigation": {
+    "tests": "src/**/*.test.ts",
+    "config": [],
+    "types": [],
+    "mainLogic": [
+      "src"
+    ]
+  }
+}

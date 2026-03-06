@@ -1,0 +1,117 @@
+version: 2
+
+default_provider: local
+default_local_model: qwen3.5-9b
+
+providers:
+  local:
+    module: workspace.providers.local_provider
+    runtime: ollama
+    default_model: qwen3.5-9b
+    required_env: []
+  codex:
+    module: workspace.providers.codex_provider
+    interface: cli
+    required_env: []
+  claude:
+    module: workspace.providers.claude_provider
+    interface: cli
+    required_env: []
+  gemini:
+    module: workspace.providers.gemini_provider
+    interface: cloud
+    required_env:
+      - GEMINI_API_KEY
+  openai:
+    module: workspace.providers.openai_provider
+    interface: cloud
+    required_env:
+      - OPENAI_API_KEY
+  anthropic:
+    module: workspace.providers.anthropic_provider
+    interface: cloud
+    required_env:
+      - ANTHROPIC_API_KEY
+
+routing:
+  prefer_local_when_possible: true
+  escalate_only_when_confidence_low: true
+  local_task_types:
+    - classification
+    - routing
+    - tool_formatting
+    - extracting_information
+    - summarizing_logs
+    - parsing_code
+    - rag_retrieval
+    - small_edits
+    - small_code_generation
+  cloud_task_types:
+    - deep_reasoning
+    - complex_architecture_design
+    - large_code_generation
+    - difficult_debugging
+    - research_tasks
+    - multi_step_reasoning
+  specialization:
+    worker_router:
+      provider: local
+      model: qwen3.5-9b
+      role: worker_and_router
+    code_generator:
+      provider: codex
+      model: codex-cli
+      role: repository_edits_and_large_generation
+    reasoning:
+      provider: claude
+      model: claude-code
+      role: architecture_planning_and_complex_debugging
+    research:
+      provider: gemini
+      model: gemini
+      role: deep_research_and_large_context_analysis
+    fallback:
+      provider: openai
+      model: openai
+      role: general_cloud_fallback
+
+profiles:
+  strategic_reasoning:
+    primary:
+      provider: claude
+      model: claude-code
+    fallbacks:
+      - provider: openai
+        model: openai
+  implementation:
+    primary:
+      provider: codex
+      model: codex-cli
+    fallbacks:
+      - provider: local
+        model: qwen3.5-9b
+      - provider: openai
+        model: openai
+  verification:
+    primary:
+      provider: local
+      model: qwen3.5-9b
+    fallbacks:
+      - provider: claude
+        model: claude-code
+  research:
+    primary:
+      provider: gemini
+      model: gemini
+    fallbacks:
+      - provider: openai
+        model: openai
+  operations:
+    primary:
+      provider: local
+      model: qwen3.5-9b
+    fallbacks:
+      - provider: codex
+        model: codex-cli
+      - provider: openai
+        model: openai

@@ -1,0 +1,52 @@
+version: 1
+
+default_flow:
+  - planner
+  - coder
+  - tester
+  - reviewer
+
+agents:
+  planner:
+    agent_module: workspace.agents.planner.agent
+    node_module: workspace.langgraph.nodes.planner_node
+    model_profile: strategic_reasoning
+    allowed_tools:
+      - filesystem_tool
+      - git_tool
+    handoff:
+      success: scheduler
+      blocked: system_alert
+  coder:
+    agent_module: workspace.agents.coder.agent
+    node_module: workspace.langgraph.nodes.coder_node
+    model_profile: implementation
+    allowed_tools:
+      - filesystem_tool
+      - git_tool
+      - terminal_tool
+    handoff:
+      success: scheduler
+      blocked: system_alert
+  tester:
+    agent_module: workspace.agents.tester.agent
+    node_module: workspace.langgraph.nodes.tester_node
+    model_profile: verification
+    allowed_tools:
+      - filesystem_tool
+      - git_tool
+      - terminal_tool
+    handoff:
+      success: scheduler
+      failure: scheduler
+  reviewer:
+    agent_module: workspace.agents.reviewer.agent
+    node_module: workspace.langgraph.nodes.reviewer_node
+    model_profile: verification
+    allowed_tools:
+      - filesystem_tool
+      - git_tool
+    handoff:
+      approved: system
+      changes_requested: scheduler
+      blocked: system_alert
