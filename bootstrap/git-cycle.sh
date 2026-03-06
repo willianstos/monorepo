@@ -264,7 +264,6 @@ month="${rest%%/*}"
 year="${date_label##*/}"
 audit_token="${year}${month}${day}-${slug}"
 checkpoint_label="${date_label} ${name_label}"
-next_branch="feature/${audit_token}-$(random_hex)"
 
 if [ -z "$start_branch" ] || [ "$start_branch" = "main" ]; then
   echo "Current branch must be a non-main feature branch." >&2
@@ -303,6 +302,7 @@ else
 fi
 
 if [ "$merge_main" = false ]; then
+  next_branch=""
   main_after="$main_before"
   log_note "checkpoint completed on branch: $start_branch"
   printf 'checkpoint branch: %s\n' "$start_branch"
@@ -310,6 +310,7 @@ if [ "$merge_main" = false ]; then
   exit 0
 fi
 
+next_branch="feature/${audit_token}-$(random_hex)"
 run_cmd git switch main
 run_cmd git pull --ff-only origin main
 run_cmd git merge --no-ff "$start_branch" -m "merge(main): ${checkpoint_label}"
