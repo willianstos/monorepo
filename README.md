@@ -1,20 +1,16 @@
 <!-- ──────────────────────────────────────────────────────────────── -->
-<!-- 01-monorepo — The Governed AI Engineering Workspace             -->
+<!-- Future Agents 🇧🇷 — The Governed AI Engineering Workspace       -->
 <!-- ──────────────────────────────────────────────────────────────── -->
 
 <div align="center">
 
 <br>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/hero-terminal.png">
-  <source media="(prefers-color-scheme: light)" srcset="./docs/assets/hero-terminal.png">
-  <img alt="01-monorepo — AI Engineering Terminal" src="./docs/assets/hero-terminal.png" width="100%">
-</picture>
+<img alt="Future Agents — AI Engineering Terminal" src="./docs/assets/hero-terminal.png" width="100%">
 
 <br>
 
-# 01-monorepo
+# Future Agents 🇧🇷
 
 ### The governed AI coding workspace for teams that ship real software.
 
@@ -35,13 +31,13 @@ Event-driven · CI-authoritative · Human-approved · Local-first
 
 <br>
 
-[Why this exists](#-why-this-exists) · 
-[Key Features](#-key-features) · 
-[How it works](#-how-it-works) · 
-[Quick Start](#-quick-start) · 
-[Why not X?](#-why-not-x) · 
-[Model Routing](#-model-routing) · 
-[Docs](#-documentation)
+[Why this exists](#why-this-exists) · 
+[Key Features](#key-features) · 
+[How it works](#how-it-works) · 
+[Quick Start](#quick-start) · 
+[Why not X?](#why-not-x) · 
+[Model Routing](#model-routing) · 
+[Docs](#documentation)
 
 <br>
 
@@ -57,7 +53,7 @@ Most AI coding setups fail in one of two ways:
 > 
 > **Too autonomous** to be trustworthy in a corporate environment.
 
-**01-monorepo is the middle path.**
+**Future Agents is the middle path.**
 
 It is not an "AI company in a repo" toy.  
 It is not a wrapper around a single LLM.  
@@ -219,8 +215,8 @@ Every issue flows through a fixed, auditable pipeline:
 ### 1. Clone & Setup
 
 ```bash
-git clone <your-repo-url> 01-monorepo
-cd 01-monorepo
+git clone https://github.com/willianstos/monorepo.git future-agents
+cd future-agents
 python3 -m venv .context/.venv
 source .context/.venv/bin/activate
 pip install -e .[dev]
@@ -256,7 +252,7 @@ REDIS_PORT=6380 REDIS_DB=15 \
   --reset-db \
   --graph-id rc-local-001 \
   --objective "Controlled flow validation" \
-  --project-name 01-monorepo
+  --project-name future-agents
 ```
 
 <details>
@@ -281,7 +277,7 @@ REDIS_PORT=6380 REDIS_DB=15 \
 
 ## ⚖️ Why Not X?
 
-Instead of adopting standalone agents that operate as black boxes, **01-monorepo** integrates AI into a strict engineering pipeline with deterministic execution.
+Instead of adopting standalone agents that operate as black boxes, **Future Agents** integrates AI into a strict engineering pipeline with deterministic execution.
 
 <table>
 <tr>
@@ -384,7 +380,7 @@ See [Model Routing](./docs/model-routing.md) · [Local Model Policy](./docs/loca
 ## 📁 Project Structure
 
 ```
-01-monorepo/
+future-agents/
 ├── .agent/                    # Shared skills, workflows, memory
 │   ├── skills/                # Reusable agent skills library
 │   ├── workflows/             # Workflow definitions (e.g., /git)
@@ -481,7 +477,7 @@ See [Release Candidate Status](./docs/release-candidate.md)
 
 **AI should accelerate software delivery without dissolving engineering discipline.**
 
-*That's what this repository is built for.*
+*That's what Future Agents 🇧🇷 is built for.*
 
 <br>
 
