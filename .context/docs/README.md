@@ -17,6 +17,8 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Security & Compliance Notes](./security.md)
 - [Tooling & Productivity Guide](./tooling.md)
 - [Local Validation Runbook](./local-validation.md)
+- [Workflow Index](../../.agent/workflows/README.md)
+- [Local Git Workflow](../../.agent/workflows/git.md)
 
 ## Repository Snapshot
 - `.agent/` — Local agent assets: curated skills, vendored catalogs, workflow notes, backups, and memory stubs.

@@ -1,5 +1,6 @@
 {
   "git.ignoredRepositories": [
-    ".agent/catalogs/antigravity-awesome-skills"
+    ".agent/catalogs/antigravity-awesome-skills",
+    "C:\\Users\\Zappro\\repos\\01-monorepo\\.agent\\catalogs\\antigravity-awesome-skills"
   ]
 }

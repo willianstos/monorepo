@@ -31,3 +31,5 @@ This directory contains ready-to-customize playbooks for AI agents collaborating
 - [Contributor Guidelines](../../CONTRIBUTING.md)
 - [Hybrid Environment Audit](../../ENV_AUDIT_WINDOWS_WSL_2026-03-05.md)
 - [Bootstrap Scripts](../../bootstrap/)
+- [Workflow Index](../../.agent/workflows/README.md)
+- [Local Git Workflow](../../.agent/workflows/git.md)
