@@ -5,8 +5,8 @@ from typing import Literal
 
 from workspace.providers.model_auditor import ModelAuditResult, ModelInfrastructureAuditor
 
-BackendType = Literal["local_api", "oauth_cli", "api"]
-TransportType = Literal["ollama", "cli", "http"]
+BackendType = Literal["local_api", "oauth_cli"]
+TransportType = Literal["ollama", "cli"]
 
 
 @dataclass(frozen=True)
@@ -52,11 +52,11 @@ class ModelRouter:
     ) -> ModelRouteDecision:
         normalized = alias.strip().lower()
 
-        if normalized in {"local", "qwen3.5-9b", "local:qwen3.5-9b"}:
+        if normalized in {"local", "qwen3.5:9b", "local:qwen3.5:9b"}:
             return ModelRouteDecision(
-                task_type=task_type or "local_worker",
+                task_type=task_type or "helper_task",
                 provider="local",
-                model="qwen3.5-9b",
+                model="qwen3.5:9b",
                 backend_type="local_api",
                 transport="ollama",
                 target="http://localhost:11434/api/generate",
@@ -66,7 +66,7 @@ class ModelRouter:
 
         if normalized in {"codex", "codex-cli"}:
             return ModelRouteDecision(
-                task_type=task_type or "large_code_generation",
+                task_type=task_type or "implementation",
                 provider="codex",
                 model="codex-cli",
                 backend_type="oauth_cli",
@@ -78,7 +78,7 @@ class ModelRouter:
 
         if normalized in {"claude", "claude-code"}:
             return ModelRouteDecision(
-                task_type=task_type or "deep_reasoning",
+                task_type=task_type or "planning",
                 provider="claude",
                 model="claude-code",
                 backend_type="oauth_cli",
@@ -88,26 +88,4 @@ class ModelRouter:
                 confidence=confidence if confidence is not None else 1.0,
             )
 
-        if normalized in {"gemini"}:
-            return ModelRouteDecision(
-                task_type=task_type or "research_tasks",
-                provider="gemini",
-                model="gemini",
-                backend_type="oauth_cli",
-                transport="cli",
-                target="gemini",
-                reason=reason or "Explicit Gemini override.",
-                confidence=confidence if confidence is not None else 1.0,
-            )
-
-        return ModelRouteDecision(
-            task_type=task_type or "general_fallback",
-            provider="openai",
-            model="openai",
-            backend_type="api",
-            transport="http",
-            target="https://api.openai.com/v1/chat/completions",
-            reason=reason or "Fallback OpenAI route.",
-            confidence=confidence if confidence is not None else 0.5,
-        )
-
+        raise ValueError(f"Unsupported model alias '{alias}' for the repository standard.")

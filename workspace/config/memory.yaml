@@ -1,4 +1,4 @@
-version: 1
+version: 2
 
 working_memory:
   backend: redis
@@ -12,14 +12,21 @@ session_memory:
   retention: recent_hours_or_days
   purpose: maintain_context_continuity
 
-long_term_memory:
-  backend: postgres_vector
+runtime_durable_memory:
+  backend: redis_distilled_records
   contents:
     - decisions
-    - architecture_changes
-    - experiment_results
+    - architecture_constraints
     - project_knowledge
-    - system_learnings
+    - distilled_lessons
+
+human_durable_memory:
+  backend: checked_in_markdown
+  location: .claude/memory
+  contents:
+    - project
+    - architecture
+    - lessons
 
 memory_flush:
   required_before_context_discard: true
@@ -41,9 +48,8 @@ memory_flush:
     - prefer_short_structured_summaries
     - avoid_duplicates
     - always_attach_tags
+    - save_stable_facts_only
 
 retrieval_order:
-  - semantic_memory
   - structured_memory
   - recent_sessions
-

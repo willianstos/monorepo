@@ -5,6 +5,7 @@ Task completion requires a Git checkpoint on the active feature branch.
 Default /git behavior must not merge main implicitly.
 CI is authoritative.
 No raw conversation logs in long-term memory.
+The local Ollama helper model is non-authoritative and may not own final coding or merge decisions.
 No direct agent-to-agent calls.
 Scheduler must validate task ownership and task status transitions before dispatch or state mutation.
 Dead-letter repeated failures and require human attention after retry exhaustion.

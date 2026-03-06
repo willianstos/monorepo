@@ -1,114 +1,55 @@
 # 01-monorepo
 
-> Last Updated: 06/03/2026
+> Last Updated: 2026-03-06
 
-Local-first AI coding assistant workspace for controlled software delivery.
-
-This repository is not a fully autonomous engineer and it is not a general production platform. It is a governed local workspace where planner, coder, tester, and reviewer coordinate through Redis Streams, a separate scheduler service, CI events, and an explicit human approval gate before merge.
+Local-first AI coding assistant workspace for controlled software delivery. This repository standardizes Codex, Claude Code, Antigravity, and a strictly limited local Ollama helper model around one event-driven architecture.
 
 ## Current Maturity
 
 Current classification: `release candidate for local controlled operation`
 
-That means the core orchestration path is real and locally verifiable today:
-
+Implemented and fixed today:
 - the scheduler is a separate service
-- Redis Streams is the only event/task bus
+- Redis Streams is the only event and task bus
 - DAG state persists in Redis
 - agents communicate only through events
 - CI is authoritative
 - merge to `main` requires recorded human approval
 
-It does not mean every boundary is fully production-hardened. External integrations, some tool surfaces, and the LangGraph execution layer still have known gaps described below.
+This is not a fully autonomous engineer and not a general production platform. It is a governed assistant workspace with real runtime enforcement and remaining RC-stage gaps documented in [`docs/release-candidate.md`](./docs/release-candidate.md).
 
-## What This Repository Is
+## Model Routing Standard
 
-- A local-first assistant workspace for AI-assisted coding and review.
-- A Redis-backed orchestration spine with real DAG persistence, event handling, retries, dead-letter handling, and audit events.
-- A human-governed workflow where CI and human approval remain authoritative.
-- A monorepo that keeps shared runtime code in `workspace/` and target projects in `projects/`.
+- Active authoritative CLI lanes: Codex CLI and Claude Code CLI.
+- Codex is the primary code generation and editing engine.
+- Claude Code is the primary planning, architecture, deep debugging, and review-assistance engine.
+- Ollama `qwen3.5:9b` is helper-only for cheap, bounded, low-risk tasks such as classification, summarization, extraction, and memory distillation.
+- Antigravity is an IDE environment and shared workflow consumer, not headless runtime authority.
+- Gemini is legacy-only and out of scope for this repository standard.
 
-## Enforced Today
+The canonical routing policy lives in [`docs/model-routing.md`](./docs/model-routing.md). The hard local-model boundary lives in [`docs/local-model-policy.md`](./docs/local-model-policy.md).
 
-- Redis Streams is the only orchestration bus.
-- Scheduler state is persisted in Redis with granular DAG and task keys.
-- Duplicate scheduler events are suppressed idempotently before state mutation.
-- Task ownership is enforced for planner, coder, tester, reviewer, and system-owned tasks.
-- Invalid task transitions are rejected and audited.
-- CI-gated tasks stay blocked until `ci_passed`.
-- Merge cannot complete without recorded approval metadata.
-- Trusted source checks apply to `human_approval_gate`, `merge_task`, and `rerun_ci`.
-- Memory runtime rejects raw conversation-style payloads and accepts only structured records.
-- `audit_log` and `system_alert` events are emitted for accepted and rejected orchestration decisions.
-- Tool contracts now enforce filesystem scope and terminal allowlists when invoked, with audit artifacts written under `.context/tool-audit/`.
+## Instruction Hierarchy
 
-## Partial Today
-
-- LangGraph nodes are still placeholder-oriented and do not yet represent the full production execution path.
-- The local end-to-end flow uses controlled simulation for Gitea/Argo boundaries instead of full external integration.
-- Tool policy is implemented locally in tool contracts, but not yet centralized as a scheduler-emitted policy plane.
-- Observability is operator-friendly for local use, but still based on Redis counters, throughput hashes, and audit stream inspection.
-- Git checkpoint workflow exists as an operator helper, but scheduler-side checkpoint attestation is not yet machine-enforced.
-
-## Still Open Before "Production Hardened"
-
-- Full external validation against real Gitea and Argo event sources.
-- Stronger tool/action artifact capture across every runtime path, not only the local tool contracts.
-- More complete incident-grade observability and operator dashboards.
-- Multi-user, multi-host, and internet-facing hardening are still out of scope.
-
-## Quick Start
-
-1. Create the local virtual environment and install the repo:
-
-```bash
-python3 -m venv .context/.venv
-.context/.venv/bin/python -m pip install -e .[dev]
-```
-
-2. Run the fast local checks:
-
-```bash
-.context/.venv/bin/python -m pytest workspace/scheduler/test_orchestration.py -q
-.context/.venv/bin/python -m mypy workspace
-.context/.venv/bin/python -m ruff check workspace projects
-```
-
-3. Start Redis for integration and local scheduler validation:
-
-```bash
-docker compose -f docker-compose.redis.yml up -d redis-integration
-```
-
-4. If `localhost:6380` is unreachable, diagnose and switch to the host-network fallback:
-
-```bash
-REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/redis_diagnostics.py
-docker compose -f docker-compose.redis.yml up -d redis-hostnet
-```
-
-5. Run the Redis-backed integration test and the controlled local flow:
-
-```bash
-REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 .context/.venv/bin/python -m pytest workspace/scheduler/test_redis_integration.py -q
-REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py controlled-flow --reset-db --graph-id rc-local-001 --objective "Release-candidate controlled flow" --project-name 01-monolito
-```
+- [`AGENTS.md`](./AGENTS.md): canonical Codex-facing repository contract.
+- [`CLAUDE.md`](./CLAUDE.md) and [`.claude/CLAUDE.md`](./.claude/CLAUDE.md): canonical Claude-facing instruction layer.
+- [`.agent/`](./.agent/README.md): shared skills, workflows, and tool-agnostic memory notes.
+- [`GUARDRAILS.md`](./GUARDRAILS.md): operator-facing safety model.
+- [`WORKSPACE.md`](./WORKSPACE.md): shared runtime boundaries and ownership.
 
 ## Core Workflow
 
-Default workflow:
-
 ```text
 issue/request
--> plan_task
--> implement_task
--> test_task
--> review_task
--> human_approval_gate
--> merge_task
+-> planner
+-> coder
+-> tester
+-> reviewer
+-> human approval
+-> merge
 ```
 
-CI failure loop:
+CI failure path:
 
 ```text
 ci_failed
@@ -118,61 +59,50 @@ ci_failed
 -> continue blocked review/approval/merge path
 ```
 
-Merge remains blocked until approval is recorded by a trusted system result payload.
+Required invariants:
+- no direct agent-to-agent calls
+- no bypass of CI
+- no merge to `main` without human approval
+- no raw conversation logs in durable memory
+- no local helper model authority over coding, security, or merge decisions
 
-## Event Model Summary
+## Quick Start
 
-Streams in use:
+1. Create the local environment and install dependencies.
 
-- `agent_tasks`
-- `agent_results`
-- `ci_events`
-- `memory_events`
-- `system_events`
-
-Base event envelope:
-
-```json
-{
-  "event_type": "string",
-  "event_id": "uuid",
-  "timestamp": "iso8601",
-  "source": "planner|coder|tester|reviewer|scheduler|ci|system",
-  "correlation_id": "uuid",
-  "payload": {}
-}
+```bash
+python3 -m venv .context/.venv
+.context/.venv/bin/python -m pip install -e .[dev]
 ```
 
-Important system events:
+2. Run the fast validation set.
 
-- `audit_log`
-- `system_alert`
-- `human_approval_required`
-- `merge_requested`
+```bash
+.context/.venv/bin/python -m pytest workspace/scheduler/test_orchestration.py -q
+.context/.venv/bin/python -m mypy workspace
+.context/.venv/bin/python -m ruff check workspace projects
+```
 
-## Guardrail Summary
+3. Start Redis for local scheduler validation.
 
-- No direct agent-to-agent calls.
-- No bypass of CI as the source of truth.
-- No merge to `main` without recorded approval.
-- Coder cannot claim test ownership.
-- Tester is limited to test and fixture scope.
-- Reviewer can block progression.
-- Protected system-owned tasks require trusted result sources.
-- Raw conversations are forbidden in long-term memory writes.
+```bash
+docker compose -f docker-compose.redis.yml up -d redis-integration
+```
 
-## Operator Docs
+4. Run the Redis-backed integration test and controlled flow.
+
+```bash
+REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 .context/.venv/bin/python -m pytest workspace/scheduler/test_redis_integration.py -q
+REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py controlled-flow --reset-db --graph-id rc-local-001 --objective "Release-candidate controlled flow" --project-name 01-monolito
+```
+
+## Key Docs
 
 - [Architecture](./docs/architecture.md)
-- [Scheduler Readme](./workspace/scheduler/README.md)
-- [Local Validation Runbook](./docs/local-validation.md)
+- [Model Routing](./docs/model-routing.md)
+- [Local Model Policy](./docs/local-model-policy.md)
+- [CLI Auth And MCP](./docs/cli-auth-and-mcp.md)
 - [Guardrails](./GUARDRAILS.md)
-- [Contributing](./CONTRIBUTING.md)
-
-## Next Milestones
-
-1. Replace remaining placeholder LangGraph execution behavior with real runtime actions.
-2. Move more tool and action auditing into the runtime/scheduler path.
-3. Validate the same flow against real external CI and code-host boundaries.
-4. Tighten checkpoint attestation, operator diagnostics, and incident-grade observability.
-5. Reassess "production hardened" only after those gaps are closed with evidence.
+- [Workspace Conventions](./WORKSPACE.md)
+- [Local Validation Runbook](./docs/local-validation.md)
+- [Release Candidate Status](./docs/release-candidate.md)

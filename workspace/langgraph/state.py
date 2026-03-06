@@ -10,7 +10,7 @@ from workspace.providers.model_auditor import ModelAuditResult
 from workspace.providers.model_router import ModelRouteDecision
 
 AgentName = Literal["planner", "coder", "tester", "reviewer"]
-ProviderName = Literal["local", "codex", "claude", "gemini", "openai", "anthropic"]
+ProviderName = Literal["local", "codex", "claude"]
 StageName = Literal[
     "intake",
     "planning",
@@ -147,7 +147,6 @@ def make_initial_state(
         "memory_flush_required": True,
         "memory_flush_candidates": [],
         "memory_retrieval_order": [
-            "semantic_memory",
             "structured_memory",
             "recent_sessions",
         ],
@@ -172,9 +171,9 @@ def make_initial_state(
         "model_route": None,
         "gateway_base_url": "http://localhost:4000",
         "gateway_chat_endpoint": "http://localhost:4000/v1/chat/completions",
-        "provider_name": provider_name or "local",
+        "provider_name": provider_name or "claude",
         "model_profile": model_profile or "strategic_reasoning",
-        "model_name": "qwen3.5-9b",
+        "model_name": "claude-code",
         "runtime_context": {},
         "task_context": {},
         "active_agent": "planner",

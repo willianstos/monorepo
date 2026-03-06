@@ -1,6 +1,6 @@
 # Memory Layer
 
-> Last Updated: 06/03/2026
+> Last Updated: 2026-03-06
 
 Structured memory architecture for the AI development workspace.
 
@@ -8,7 +8,8 @@ Structured memory architecture for the AI development workspace.
 
 - `Working Memory`: temporary state intended for Redis. Stores current tasks, agent state, and partial outputs.
 - `Session Memory`: recent interaction continuity for the last hours or days.
-- `Long-Term Memory`: persistent knowledge intended for Postgres plus vector embeddings.
+- `Runtime Durable Memory`: persistent distilled runtime knowledge stored as Redis-backed structured records.
+- `Human Durable Memory`: checked-in curated notes under `.claude/memory/`.
 
 ## Memory Flush
 
@@ -43,6 +44,5 @@ Flush targets:
 
 ## Retrieval Strategy
 
-1. Search semantic memory
-2. Search structured memory
-3. Search recent sessions
+1. Search structured memory
+2. Search recent sessions

@@ -1,14 +1,19 @@
 # Documentation Index
 
-> Last Updated: 06/03/2026
+> Last Updated: 2026-03-06
 
 Welcome to the repository knowledge base. Start with the project overview, then dive into specific guides as needed.
 
 ## Core Guides
 - [Repository Overview](../../README.md)
+- [Codex Instructions](../../AGENTS.md)
+- [Claude Instructions](../../CLAUDE.md)
 - [Contributor Guide](../../CONTRIBUTING.md)
 - [Workspace Conventions](../../WORKSPACE.md)
 - [Guardrails](../../GUARDRAILS.md)
+- [Model Routing](../../docs/model-routing.md)
+- [Local Model Policy](../../docs/local-model-policy.md)
+- [CLI Auth And MCP](../../docs/cli-auth-and-mcp.md)
 - [Agent Rules](../../docs/agent_rules.md)
 - [Hybrid Environment Audit (2026-03-05)](../../ENV_AUDIT_WINDOWS_WSL_2026-03-05.md)
 - [Project Overview](./project-overview.md)
@@ -23,10 +28,12 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Release Candidate Status](../../docs/release-candidate.md)
 - [Workflow Index](../../.agent/workflows/README.md)
 - [Local Git Workflow](../../.agent/workflows/git.md)
+- [Shared Agent Layer](../../.agent/README.md)
 - [Finish With Git Rule](../../.agent/rules/finish-with-git.md)
 
 ## Repository Snapshot
 - `.agent/` — Local agent assets: curated skills, vendored catalogs, workflow notes, rules, backups, and memory stubs.
+- `.claude/` — Claude-specific rules plus curated durable project memory.
 - `docs/` — Human-authored architecture and operating guides for the workspace.
 - `env/` — Local environment templates and example configuration inputs.
 - `GUARDRAILS.md` — Narrative explanation of repository safety rules.
@@ -52,3 +59,6 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 | Tooling & Productivity Guide | `tooling.md` | CLI scripts, IDE configs, automation workflows |
 | Local Validation Runbook | `local-validation.md` | Redis integration flow, audit inspection, local orchestration checks |
 | Release Candidate Status | `../../docs/release-candidate.md` | RC maturity, exact validation commands, remaining hardening gaps |
+| Model Routing | `../../docs/model-routing.md` | model authority split, escalation rules, local-helper lane |
+| Local Model Policy | `../../docs/local-model-policy.md` | approved helper tasks, forbidden local-model tasks, token economy |
+| CLI Auth And MCP | `../../docs/cli-auth-and-mcp.md` | Codex login, Claude auth, MCP and memory operator commands |

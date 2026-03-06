@@ -3,7 +3,7 @@ from workspace.agents.base import AgentSpec
 SPEC = AgentSpec(
     name="reviewer",
     mission="Review change quality, correctness, security risk, and guardrail compliance.",
-    model_profile="verification",
+    model_profile="review",
     responsibilities=(
         "Assess correctness and maintainability.",
         "Flag security, reliability, and policy risks.",

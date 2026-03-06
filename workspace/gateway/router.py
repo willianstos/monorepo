@@ -11,9 +11,7 @@ from workspace.gateway.providers import (
     CodexCLIProvider,
     GenerationOptions,
     GatewayProvider,
-    GeminiCLIProvider,
     OllamaProvider,
-    OpenAIAPIProvider,
 )
 from workspace.gateway.schemas import ChatCompletionChoice, ChatCompletionRequest, ChatCompletionResponse, ChatMessage
 from workspace.providers.model_router import ModelRouteDecision, ModelRouter
@@ -34,8 +32,6 @@ class GatewayRouter:
                 "local": OllamaProvider(),
                 "codex": CodexCLIProvider(),
                 "claude": ClaudeCLIProvider(),
-                "gemini": GeminiCLIProvider(),
-                "openai": OpenAIAPIProvider(),
             },
         )
 

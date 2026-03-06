@@ -1,6 +1,6 @@
 # Agent Handbook
 
-> Last Updated: 06/03/2026
+> Last Updated: 2026-03-06
 
 This directory contains ready-to-customize playbooks for AI agents collaborating on the repository.
 
@@ -30,8 +30,10 @@ This directory contains ready-to-customize playbooks for AI agents collaborating
 ## Related Resources
 - [Documentation Index](../docs/README.md)
 - [Agent Knowledge Base](../../AGENTS.md)
+- [Claude Instructions](../../CLAUDE.md)
 - [Contributor Guidelines](../../CONTRIBUTING.md)
 - [Hybrid Environment Audit](../../ENV_AUDIT_WINDOWS_WSL_2026-03-05.md)
+- [Shared Agent Layer](../../.agent/README.md)
 - [Bootstrap Scripts](../../bootstrap/)
 - [Workflow Index](../../.agent/workflows/README.md)
 - [Local Git Workflow](../../.agent/workflows/git.md)

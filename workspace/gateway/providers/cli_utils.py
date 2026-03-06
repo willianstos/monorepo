@@ -13,7 +13,7 @@ class ProviderExecutionError(RuntimeError):
 
 @dataclass(frozen=True)
 class CLISandboxExecutor:
-    allowed_commands: tuple[str, ...] = ("codex", "claude", "gemini")
+    allowed_commands: tuple[str, ...] = ("codex", "claude")
     timeout_seconds: int = 180
 
     def run(
@@ -78,4 +78,3 @@ class CLISandboxExecutor:
         env = {key: value for key, value in os.environ.items() if key.upper() in allowlist}
         env.update(extra_env)
         return env
-

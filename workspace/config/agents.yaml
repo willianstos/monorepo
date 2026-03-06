@@ -31,7 +31,7 @@ agents:
   tester:
     agent_module: workspace.agents.tester.agent
     node_module: workspace.langgraph.nodes.tester_node
-    model_profile: verification
+    model_profile: testing
     allowed_tools:
       - filesystem_tool
       - git_tool
@@ -42,7 +42,7 @@ agents:
   reviewer:
     agent_module: workspace.agents.reviewer.agent
     node_module: workspace.langgraph.nodes.reviewer_node
-    model_profile: verification
+    model_profile: review
     allowed_tools:
       - filesystem_tool
       - git_tool

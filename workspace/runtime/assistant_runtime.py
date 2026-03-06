@@ -66,7 +66,9 @@ class AssistantRuntime:
             "model_policy": {
                 "model_agnostic_scheduler": True,
                 "sample_route": router.route_task("Summarize CI logs").model,
-                "local_first": True,
+                "local_first_for_helper_tasks": True,
+                "helper_only_local_model": True,
+                "authoritative_models": ["codex", "claude"],
             },
             "memory": {
                 "layers": memory.memory_layers(),
