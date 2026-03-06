@@ -2,7 +2,7 @@
 
 > Last Updated: 2026-03-06
 
-This is the canonical step-by-step activation guide for the `01-monorepo` PR validation pipeline on the **local Gitea instance running on H1 (WSL Docker, `http://localhost:3001`)**.
+This is the canonical step-by-step activation guide for the `Future Agents` PR validation pipeline on the **local Gitea instance running on H1 (WSL Docker, `http://localhost:3001`)**.
 
 It must be followed in order. Each section has explicit actions, exact commands, and explicit verification gates.
 
@@ -130,7 +130,7 @@ act_runner register \
   --no-interactive \
   --instance "http://192.168.15.83:3001" \
   --token "<REGISTRATION_TOKEN>" \
-  --name "01-monorepo-runner" \
+  --name "future-agents-runner" \
   --labels "ubuntu-latest:docker://node:20-bookworm"
 ```
 
@@ -143,7 +143,7 @@ docker run --rm \
   -v /home/will/projetos/gitea-wsl-ops/act-runner-data:/data \
   -e GITEA_INSTANCE_URL="http://192.168.15.83:3001" \
   -e GITEA_RUNNER_REGISTRATION_TOKEN="<REGISTRATION_TOKEN>" \
-  -e GITEA_RUNNER_NAME="01-monorepo-runner" \
+  -e GITEA_RUNNER_NAME="future-agents-runner" \
   -e GITEA_RUNNER_LABELS="ubuntu-latest:docker://node:20-bookworm" \
   gitea/act_runner:latest register
 ```
@@ -170,7 +170,7 @@ docker run -d \
 ### B4. Verify runner is online
 
 1. Open `http://localhost:3001/admin/ai-engineering-monorepo/settings/actions/runners`
-2. The runner `01-monorepo-runner` should appear with status **idle** or **online**
+2. The runner `future-agents-runner` should appear with status **idle** or **online**
 
 Via API:
 ```bash
@@ -378,7 +378,7 @@ docker run --rm \
   -v /home/will/projetos/gitea-wsl-ops/act-runner-data:/data \
   -e GITEA_INSTANCE_URL="http://192.168.15.83:3001" \
   -e GITEA_RUNNER_REGISTRATION_TOKEN="<PASTE_TOKEN_HERE>" \
-  -e GITEA_RUNNER_NAME="01-monorepo-runner" \
+  -e GITEA_RUNNER_NAME="future-agents-runner" \
   -e GITEA_RUNNER_LABELS="ubuntu-latest:docker://node:20-bookworm" \
   gitea/act_runner:latest register
 

@@ -2,7 +2,7 @@
 
 > Last Updated: 2026-03-06
 
-This document is the canonical operator guide for the Gitea-based PR validation pipeline in `01-monorepo`. It covers Gitea Actions enablement, act_runner registration, networking, branch protection, and the required PR gate.
+This document is the canonical operator guide for the Gitea-based PR validation pipeline in `Future Agents`. It covers Gitea Actions enablement, act_runner registration, networking, branch protection, and the required PR gate.
 
 ## Canonical PR Gate
 
@@ -39,7 +39,7 @@ Via Gitea web UI:
 
 Via API:
 ```bash
-curl -X POST "http://<GITEA_HOST>:<PORT>/api/v1/repos/<OWNER>/01-monorepo/actions/runners/registration-token" \
+curl -X POST "http://<GITEA_HOST>:<PORT>/api/v1/repos/<OWNER>/future-agents/actions/runners/registration-token" \
   -H "Authorization: token <ACCESS_TOKEN>"
 ```
 
@@ -53,7 +53,7 @@ Download the latest `act_runner` binary from [gitea.com/gitea/act_runner/release
 act_runner register \
   --instance http://<GITEA_HOST>:<PORT> \
   --token <REGISTRATION_TOKEN> \
-  --name 01-monorepo-runner \
+  --name future-agents-runner \
   --labels ubuntu-latest:docker://node:20-bookworm
 ```
 
@@ -105,7 +105,7 @@ Options (pick the one that matches your environment):
 act_runner register \
   --instance http://192.168.15.83:3000 \
   --token <TOKEN> \
-  --name 01-monorepo-runner \
+  --name future-agents-runner \
   --labels ubuntu-latest:docker://node:20-bookworm
 ```
 

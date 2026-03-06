@@ -12,6 +12,7 @@ Practical operator notes only.
 - `AGENTS.md` is the repo-native Codex instruction layer.
 - Prefer shared skills under `.agent/` over deprecated custom prompt patterns.
 - Use `codex mcp` to manage MCP servers for Codex.
+- For the local Epic 1 server, use [Operator MCP Local Usage](./operator/mcp-local-usage.md).
 
 ## Claude
 
@@ -20,3 +21,4 @@ Practical operator notes only.
 - Inside Claude, `/mcp` is the operator path for MCP connections and auth management.
 - Inside Claude, `/memory` is the operator path for memory handling.
 - Keep terminal, IDE, and desktop sessions aligned with the same checked-in instructions and memory files.
+- The repository MCP server remains stdio-only in Epic 1 and is documented in [Operator MCP Local Usage](./operator/mcp-local-usage.md).

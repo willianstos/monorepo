@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file is the canonical Codex-facing instruction layer for `01-monorepo` / `01-monolito`. Claude-specific files under `CLAUDE.md` and `.claude/` may add workflow detail, but they must stay consistent with this file.
+This file is the canonical Codex-facing instruction layer for `Future Agents`. Claude-specific files under `CLAUDE.md` and `.claude/` may add workflow detail, but they must stay consistent with this file.
 
 ## Repository Identity
 - Local-first AI coding assistant workspace for controlled software delivery.

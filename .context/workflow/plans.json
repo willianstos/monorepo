@@ -1,0 +1,14 @@
+{
+  "active": [
+    {
+      "slug": "future-agents-evolution-2026",
+      "path": "plans/future-agents-evolution-2026.md",
+      "title": "Future Agents Evolution Roadmap 2026",
+      "summary": "Structured execution plan for the roadmap captured on March 6, 2026 in [plan.md](../../plan.md).",
+      "linkedAt": "2026-03-06T10:41:43.104Z",
+      "status": "active"
+    }
+  ],
+  "completed": [],
+  "primary": "future-agents-evolution-2026"
+}
