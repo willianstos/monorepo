@@ -11,6 +11,7 @@ env/*.local
 .context/.venv/
 .context/backups/
 .context/exports/
+.context/runs/
 .agent/backups/
 .agent/catalogs/
 .agent/skills/

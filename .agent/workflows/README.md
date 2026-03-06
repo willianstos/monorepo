@@ -18,3 +18,4 @@ This directory stores workspace-owned Antigravity workflows.
 - Prefer calling repository scripts when the workflow contains executable logic.
 - Keep dangerous Git operations out of workflows by default.
 - Use merge commits for auditability when the workflow updates `main`.
+- Keep Markdown workflows thin; operational behavior should live in scripts under `bootstrap/`.
