@@ -90,6 +90,7 @@ class AgentEventConsumer:
 
     @classmethod
     def build_default(cls, *, bus: RedisStreamBus, consumer_role: str) -> "AgentEventConsumer":
+        subscriptions: tuple[ConsumerRegistration, ...]
         if consumer_role == "scheduler":
             subscriptions = (
                 ConsumerRegistration("agent_tasks", DefaultEventHandlers.capture),

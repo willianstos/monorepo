@@ -46,7 +46,7 @@ Requer uma instância Redis em execução na porta 6380.
 **Iniciar o Redis:**
 
 ```bash
-docker compose -f env/docker-compose.redis.yml up -d redis-integration
+docker compose -f docker-compose.redis.yml up -d redis-integration
 ```
 
 **Executar testes de integração:**

@@ -35,6 +35,7 @@ The monorepo separates shared orchestration runtime from concrete target project
 - Scheduler event handling is now idempotent by persisted event ID, with `audit_log` emitted for duplicate suppression and rejected transitions.
 - Runtime memory writes now enforce structured `MemoryRecord` payloads and reject raw transcript-style fields on the write path.
 - Minimal Redis-backed observability is available through scheduler metrics and runtime health snapshots.
+- Local tool contracts now enforce repo-root scope and terminal allowlists, with audit artifacts stored under `.context/tool-audit/`.
 - Several LangGraph agent nodes still behave like placeholders even though the scheduler/event bus layer is implemented.
 - Every tool action should still become fully auditable, replayable, and policy-checked.
 - Memory still needs richer long-term storage and retrieval beyond the current Redis-backed runtime sink.

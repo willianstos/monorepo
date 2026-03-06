@@ -7,37 +7,49 @@ from typing import Any, Iterable
 from workspace.event_bus.events import AgentEvent, StreamEventRecord, validate_stream_name
 from workspace.event_bus.streams import ALL_STREAMS, StreamName
 
+RedisClientFactory: type[Any] | None = None
+ResponseError: type[Exception] = Exception
 try:
-    from redis import Redis
-    from redis.exceptions import ResponseError
+    from redis import Redis as _ImportedRedis
+    from redis.exceptions import ResponseError as _ImportedResponseError
 except ImportError:  # pragma: no cover - import-safe fallback
-    Redis = None  # type: ignore[assignment]
+    pass
+else:
+    RedisClientFactory = _ImportedRedis
+    ResponseError = _ImportedResponseError
 
-    class ResponseError(Exception):
-        """Fallback response error when redis-py is unavailable."""
+
+def _read_int_env(name: str, *, default: int) -> int:
+    raw_value = os.getenv(name)
+    if raw_value is None or not raw_value.strip():
+        return default
+    return int(raw_value)
+
+
+def _read_optional_int_env(name: str) -> int | None:
+    raw_value = os.getenv(name)
+    if raw_value is None or not raw_value.strip():
+        return None
+    return int(raw_value)
 
 
 @dataclass
 class RedisStreamBus:
     host: str = field(default_factory=lambda: os.getenv("REDIS_HOST", "127.0.0.1"))
-    port: int = field(default_factory=lambda: int(os.getenv("REDIS_PORT", "6379")))
-    db: int = field(default_factory=lambda: int(os.getenv("REDIS_DB", "0")))
+    port: int = field(default_factory=lambda: _read_int_env("REDIS_PORT", default=6379))
+    db: int = field(default_factory=lambda: _read_int_env("REDIS_DB", default=0))
     password: str | None = field(default_factory=lambda: os.getenv("REDIS_PASSWORD"))
-    stream_maxlen: int | None = field(
-        default_factory=lambda: (
-            int(os.getenv("REDIS_STREAM_MAXLEN")) if os.getenv("REDIS_STREAM_MAXLEN") else None
-        )
-    )
+    stream_maxlen: int | None = field(default_factory=lambda: _read_optional_int_env("REDIS_STREAM_MAXLEN"))
     client: Any = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.client = self.connect()
 
     def connect(self) -> Any:
-        if Redis is None:
+        if RedisClientFactory is None:
             return None
 
-        return Redis(
+        return RedisClientFactory(
             host=self.host,
             port=self.port,
             db=self.db,
@@ -82,7 +94,12 @@ class RedisStreamBus:
     ) -> None:
         client = self.require_client()
         try:
-            client.xgroup_create(name=validate_stream_name(stream), groupname=group_name, id=start_id, mkstream=mkstream)
+            client.xgroup_create(
+                name=validate_stream_name(stream),
+                groupname=group_name,
+                id=start_id,
+                mkstream=mkstream,
+            )
         except ResponseError as exc:
             if "BUSYGROUP" not in str(exc):
                 raise

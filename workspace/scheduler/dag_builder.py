@@ -2,12 +2,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from workspace.event_bus import AgentEvent
 
 TaskStatus = Literal["pending", "ready", "running", "blocked", "failed", "completed", "cancelled"]
 AssignedActor = Literal["planner", "coder", "tester", "reviewer", "system"]
+TASK_STATUS_VALUES: tuple[TaskStatus, ...] = (
+    "pending",
+    "ready",
+    "running",
+    "blocked",
+    "failed",
+    "completed",
+    "cancelled",
+)
+ASSIGNED_ACTOR_VALUES: tuple[AssignedActor, ...] = ("planner", "coder", "tester", "reviewer", "system")
 
 TASK_NODE_FIELDS: tuple[str, ...] = (
     "task_id",
@@ -210,13 +220,16 @@ class DagBuilder:
             task_type = str(raw_node.get("task_type") or raw_node.get("name") or f"task_{index + 1}")
             task_id = str(raw_node.get("task_id") or self.build_task_id(graph_id, task_type, suffix=index + 1))
             explicit_dependencies = raw_node.get("dependencies")
+            dependencies: tuple[str, ...]
             if explicit_dependencies is None and previous_task_id:
                 dependencies = (previous_task_id,)
             else:
                 dependencies = tuple(str(dependency) for dependency in explicit_dependencies or ())
 
-            assigned_agent = raw_node.get("assigned_agent") or self.assigned_agent_for(task_type)
-            status = str(raw_node.get("status") or ("ready" if not dependencies else "pending"))
+            assigned_agent = self.coerce_assigned_actor(
+                raw_node.get("assigned_agent") or self.assigned_agent_for(task_type)
+            )
+            status = self.coerce_task_status(raw_node.get("status") or ("ready" if not dependencies else "pending"))
             guardrail_policy = dict(
                 raw_node.get("guardrail_policy")
                 or self.default_guardrail_policy(task_type=task_type, assigned_agent=assigned_agent)
@@ -327,6 +340,20 @@ class DagBuilder:
 
     def assigned_agent_for(self, task_type: str) -> AssignedActor:
         return TASK_ASSIGNMENTS.get(task_type, "system")
+
+    @staticmethod
+    def coerce_assigned_actor(raw_value: Any) -> AssignedActor:
+        actor = str(raw_value).strip().lower()
+        if actor not in ASSIGNED_ACTOR_VALUES:
+            raise ValueError(f"Unsupported assigned_agent '{raw_value}'.")
+        return cast(AssignedActor, actor)
+
+    @staticmethod
+    def coerce_task_status(raw_value: Any) -> TaskStatus:
+        status = str(raw_value).strip().lower()
+        if status not in TASK_STATUS_VALUES:
+            raise ValueError(f"Unsupported task status '{raw_value}'.")
+        return cast(TaskStatus, status)
 
     def build_task_id(self, graph_id: str, task_type: str, *, suffix: int | None = None) -> str:
         if suffix is None:

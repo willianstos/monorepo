@@ -20,6 +20,7 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 - [Security & Compliance Notes](./security.md)
 - [Tooling & Productivity Guide](./tooling.md)
 - [Local Validation Runbook](./local-validation.md)
+- [Release Candidate Status](../../docs/release-candidate.md)
 - [Workflow Index](../../.agent/workflows/README.md)
 - [Local Git Workflow](../../.agent/workflows/git.md)
 - [Finish With Git Rule](../../.agent/rules/finish-with-git.md)
@@ -50,3 +51,4 @@ Welcome to the repository knowledge base. Start with the project overview, then 
 | Security & Compliance Notes | `security.md` | Auth model, secrets management, compliance requirements |
 | Tooling & Productivity Guide | `tooling.md` | CLI scripts, IDE configs, automation workflows |
 | Local Validation Runbook | `local-validation.md` | Redis integration flow, audit inspection, local orchestration checks |
+| Release Candidate Status | `../../docs/release-candidate.md` | RC maturity, exact validation commands, remaining hardening gaps |

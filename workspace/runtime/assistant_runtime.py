@@ -106,10 +106,62 @@ class AssistantRuntime:
 
     def scheduler_health_report(self) -> dict[str, Any]:
         scheduler = self.scheduler_service()
+        observability = scheduler.observability_snapshot()
+        metrics = cast(dict[str, int], observability.get("metrics", {}))
+        throughput = cast(dict[str, dict[str, int]], observability.get("throughput", {}))
+        created_total = sum(throughput.get("created", {}).values())
+        completed_total = sum(throughput.get("completed", {}).values())
+        cancelled_total = sum(throughput.get("cancelled", {}).values())
+        backlog_estimate = max(created_total - completed_total - cancelled_total, 0)
+        dead_letters = metrics.get("dead_letters", 0)
+        blocked_tasks = metrics.get("tasks_blocked", 0)
+        merge_blocks = metrics.get("merge_blocks", 0)
+        ci_failures = metrics.get("ci_failures", 0)
+        connection_available = bool(observability.get("connection_available")) and not bool(
+            observability.get("connection_error")
+        )
+
+        status = "healthy"
+        if not connection_available:
+            status = "unavailable"
+        elif any(value > 0 for value in (dead_letters, blocked_tasks, merge_blocks, ci_failures, backlog_estimate)):
+            status = "attention_required"
+
+        operator_hints: list[str] = []
+        if not connection_available:
+            operator_hints.append("Redis is unreachable from the scheduler; run bootstrap/redis_diagnostics.py.")
+        if backlog_estimate > 0:
+            operator_hints.append("Backlog is non-zero; compare scheduler throughput created vs completed counts.")
+        if dead_letters > 0:
+            operator_hints.append("Dead-letter records exist; inspect dead_letter:* and matching audit_log events.")
+        if merge_blocks > 0:
+            operator_hints.append(
+                "Merge blocks were recorded in this Redis history; confirm human approval metadata for the graph."
+            )
+        if ci_failures > 0:
+            operator_hints.append("CI failures were recorded; inspect ci_events ordering and rerun_ci progression.")
+        if not operator_hints:
+            operator_hints.append("No blocking scheduler signals are currently visible.")
+
         return {
+            "status": status,
+            "summary": {
+                "connection_available": connection_available,
+                "processed_event_count": int(observability.get("processed_event_count", 0)),
+                "created_total": created_total,
+                "completed_total": completed_total,
+                "cancelled_total": cancelled_total,
+                "backlog_estimate": backlog_estimate,
+                "dead_letters": dead_letters,
+                "tasks_blocked": blocked_tasks,
+                "merge_blocks": merge_blocks,
+                "ci_failures": ci_failures,
+            },
+            "operator_hints": operator_hints,
             "scheduler": scheduler.describe(),
-            "observability": scheduler.observability_snapshot(),
+            "observability": observability,
         }
+
 
     def dry_run_validation(self) -> dict[str, Any]:
         scheduler = self.scheduler_service()

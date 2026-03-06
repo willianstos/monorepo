@@ -4,11 +4,13 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import cast
 
 from workspace.gateway.providers import (
     ClaudeCLIProvider,
     CodexCLIProvider,
     GenerationOptions,
+    GatewayProvider,
     GeminiCLIProvider,
     OllamaProvider,
     OpenAIAPIProvider,
@@ -23,15 +25,19 @@ class GatewayRouter:
     usage_log_path: Path = field(
         default_factory=lambda: Path(__file__).resolve().parent / "usage.log"
     )
+    _providers: dict[str, GatewayProvider] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        self._providers = {
-            "local": OllamaProvider(),
-            "codex": CodexCLIProvider(),
-            "claude": ClaudeCLIProvider(),
-            "gemini": GeminiCLIProvider(),
-            "openai": OpenAIAPIProvider(),
-        }
+        self._providers = cast(
+            dict[str, GatewayProvider],
+            {
+                "local": OllamaProvider(),
+                "codex": CodexCLIProvider(),
+                "claude": ClaudeCLIProvider(),
+                "gemini": GeminiCLIProvider(),
+                "openai": OpenAIAPIProvider(),
+            },
+        )
 
     def handle_chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         route = self.route_request(request)
@@ -45,7 +51,10 @@ class GatewayRouter:
         )
 
         started_at = time.perf_counter()
-        result = self._providers[route.provider].generate(prompt, options)
+        provider = self._providers.get(route.provider)
+        if provider is None:
+            raise ValueError(f"Unsupported provider '{route.provider}'.")
+        result = provider.generate(prompt, options)
         latency_ms = int((time.perf_counter() - started_at) * 1000)
 
         self.log_usage(route, latency_ms)
@@ -85,4 +94,3 @@ class GatewayRouter:
         self.usage_log_path.parent.mkdir(parents=True, exist_ok=True)
         with self.usage_log_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record) + "\n")
-
