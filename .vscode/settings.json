@@ -1,0 +1,5 @@
+{
+  "git.ignoredRepositories": [
+    ".agent/catalogs/antigravity-awesome-skills"
+  ]
+}
