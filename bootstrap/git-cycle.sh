@@ -4,10 +4,13 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  bash bootstrap/git-cycle.sh "dd/mm/aaaa" "nome-randomico"
+  bash bootstrap/git-cycle.sh [--dry-run] "dd/mm/aaaa" "nome-randomico"
+  bash bootstrap/git-cycle.sh --cleanup-smoke
 
-Example:
+Examples:
   bash bootstrap/git-cycle.sh "06/03/2026" "atlas-raven"
+  bash bootstrap/git-cycle.sh --dry-run "06/03/2026" "atlas-raven"
+  bash bootstrap/git-cycle.sh --cleanup-smoke
 EOF
 }
 
@@ -18,7 +21,7 @@ slugify() {
 }
 
 random_hex() {
-  od -An -N3 -tx1 /dev/urandom | tr -d ' \n'
+  openssl rand -hex 3
 }
 
 require_wsl() {
@@ -28,8 +31,194 @@ require_wsl() {
   fi
 }
 
-if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
-  usage
+timestamp_id() {
+  date '+%Y%m%d-%H%M%S'
+}
+
+command_repr() {
+  local parts=()
+  local arg
+  for arg in "$@"; do
+    parts+=("$(printf '%q' "$arg")")
+  done
+  printf '%s' "${parts[*]}"
+}
+
+log_note() {
+  printf '%s\n' "$*" | tee -a "$audit_log"
+}
+
+run_cmd() {
+  local rendered
+  rendered="$(command_repr "$@")"
+  log_note "\$ $rendered"
+  if [ "$dry_run" = true ]; then
+    log_note "dry-run: skipped"
+    return 0
+  fi
+  "$@" 2>&1 | tee -a "$audit_log"
+}
+
+write_summary() {
+  local status_label="$1"
+  {
+    echo "# Git Workflow Run"
+    echo
+    echo "- action: $action_name"
+    echo "- status: $status_label"
+    echo "- repo_root: $repo_root"
+    echo "- origin: $origin_url"
+    echo "- start_branch: ${start_branch:-unknown}"
+    echo "- main_before: ${main_before:-unknown}"
+    echo "- main_after: ${main_after:-unknown}"
+    echo "- next_branch: ${next_branch:-n/a}"
+    echo "- dry_run: $dry_run"
+    echo "- cleanup_smoke: $cleanup_smoke"
+    if [ -n "${checkpoint_label:-}" ]; then
+      echo "- label: $checkpoint_label"
+    fi
+    if [ "${#cleaned_branches[@]}" -gt 0 ]; then
+      echo "- cleaned_branches: ${cleaned_branches[*]}"
+    fi
+    if [ "${#skipped_branches[@]}" -gt 0 ]; then
+      echo "- skipped_branches: ${skipped_branches[*]}"
+    fi
+    echo "- commands_log: $audit_log"
+  } >"$audit_summary"
+}
+
+finish() {
+  local rc="$1"
+  if [ -z "${audit_summary:-}" ]; then
+    return
+  fi
+  if [ "$rc" -eq 0 ]; then
+    if [ "$dry_run" = true ]; then
+      write_summary "dry-run"
+    else
+      write_summary "success"
+    fi
+  else
+    write_summary "failed"
+  fi
+}
+
+cleanup_smoke_branches() {
+  local current_branch branch ref_for_ancestor
+  local local_exists remote_exists
+
+  current_branch="$(git branch --show-current || true)"
+  while IFS= read -r branch; do
+    [ -n "$branch" ] || continue
+    if [ "$branch" = "$current_branch" ] || [ "$branch" = "main" ]; then
+      skipped_branches+=("${branch}:active-or-main")
+      continue
+    fi
+
+    local_exists=false
+    remote_exists=false
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
+      local_exists=true
+      ref_for_ancestor="$branch"
+    elif git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      remote_exists=true
+      ref_for_ancestor="origin/$branch"
+    else
+      continue
+    fi
+
+    if ! git merge-base --is-ancestor "$ref_for_ancestor" main; then
+      skipped_branches+=("${branch}:not-merged-into-main")
+      continue
+    fi
+
+    if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      remote_exists=true
+    fi
+
+    if $remote_exists; then
+      run_cmd git push origin --delete "$branch"
+    fi
+    if $local_exists; then
+      run_cmd git branch -d "$branch"
+    fi
+    cleaned_branches+=("$branch")
+  done < <(
+    {
+      git for-each-ref --format='%(refname:short)' 'refs/heads/feature/*-git-workflow-smoke-*'
+      git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/feature/*-git-workflow-smoke-*' | sed 's#^origin/##'
+    } | sort -u
+  )
+}
+
+dry_run=false
+cleanup_smoke=false
+action_name="cycle"
+date_label=""
+name_label=""
+checkpoint_label=""
+repo_root=""
+origin_url=""
+start_branch=""
+main_before=""
+main_after=""
+next_branch=""
+audit_log=""
+audit_summary=""
+audit_dir=""
+cleaned_branches=()
+skipped_branches=()
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    --cleanup-smoke)
+      cleanup_smoke=true
+      action_name="cleanup-smoke"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+require_wsl
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+audit_dir="$repo_root/.context/runs/git/$(timestamp_id)-${action_name}"
+mkdir -p "$audit_dir"
+audit_log="$audit_dir/commands.log"
+audit_summary="$audit_dir/summary.md"
+: >"$audit_log"
+trap 'finish $?' EXIT
+
+origin_url="$(git remote get-url origin)"
+start_branch="$(git branch --show-current)"
+main_before="$(git rev-parse --short main)"
+
+if [ "$cleanup_smoke" = true ]; then
+  run_cmd git fetch origin --prune
+  cleanup_smoke_branches
+  main_after="$(git rev-parse --short main)"
+  log_note "cleanup completed"
   exit 0
 fi
 
@@ -59,18 +248,14 @@ month="${rest%%/*}"
 year="${date_label##*/}"
 audit_token="${year}${month}${day}-${slug}"
 checkpoint_label="${date_label} ${name_label}"
+next_branch="feature/${audit_token}-$(random_hex)"
 
-require_wsl
-
-git rev-parse --show-toplevel >/dev/null
-
-current_branch="$(git branch --show-current)"
-if [ -z "$current_branch" ] || [ "$current_branch" = "main" ]; then
+if [ -z "$start_branch" ] || [ "$start_branch" = "main" ]; then
   echo "Current branch must be a non-main feature branch." >&2
   exit 1
 fi
 
-if [ -z "$(git remote)" ] || ! git remote get-url origin >/dev/null 2>&1; then
+if ! git remote get-url origin >/dev/null 2>&1; then
   echo "Remote origin is required." >&2
   exit 1
 fi
@@ -80,23 +265,33 @@ if git diff --name-only --diff-filter=U | grep -q .; then
   exit 1
 fi
 
-git fetch origin --prune
-git ls-remote --exit-code --heads origin main >/dev/null
-
-if [ -n "$(git status --porcelain)" ]; then
-  git add -A
-  git commit -m "chore(repo): checkpoint ${checkpoint_label}"
+run_cmd git fetch origin --prune
+if [ "$dry_run" = false ]; then
+  git ls-remote --exit-code --heads origin main >/dev/null
+else
+  log_note '$ git ls-remote --exit-code --heads origin main'
+  log_note 'dry-run: skipped'
 fi
 
-git push -u origin "$current_branch"
+if [ -n "$(git status --porcelain)" ]; then
+  run_cmd git add -A
+  run_cmd git commit -m "chore(repo): checkpoint ${checkpoint_label}"
+fi
 
-git switch main
-git pull --ff-only origin main
-git merge --no-ff "$current_branch" -m "merge(main): ${checkpoint_label}"
-git push origin main
+run_cmd git push -u origin "$start_branch"
+run_cmd git switch main
+run_cmd git pull --ff-only origin main
+run_cmd git merge --no-ff "$start_branch" -m "merge(main): ${checkpoint_label}"
+run_cmd git push origin main
+run_cmd git switch -c "$next_branch"
+run_cmd git push -u origin "$next_branch"
 
-next_branch="feature/${audit_token}-$(random_hex)"
-git switch -c "$next_branch"
-git push -u origin "$next_branch"
+if [ "$dry_run" = false ]; then
+  main_after="$(git rev-parse --short main)"
+else
+  main_after="$main_before"
+fi
 
+log_note "next branch: $next_branch"
 printf 'next branch: %s\n' "$next_branch"
+printf 'audit dir: %s\n' "$audit_dir"
