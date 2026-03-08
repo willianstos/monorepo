@@ -1,0 +1,391 @@
+[metadata]
+version = 1
+default_profile = "factory"
+
+[paths]
+repo_root_wsl = "/mnt/c/Users/Zappro/repos/01-monorepo"
+repo_root_windows = "C:\\Users\\Zappro\\repos\\01-monorepo"
+projects_base_wsl = "/mnt/c/Users/Zappro/repos"
+projects_base_windows = "C:\\Users\\Zappro\\repos"
+codex_include_wsl = "/mnt/c/Users/Zappro/repos/codex-mcp-server/.mcp"
+codex_include_windows = "C:\\Users\\Zappro\\repos\\codex-mcp-server\\.mcp"
+filesystem_root_wsl = "/mnt/c/Users/Zappro/repos/codex-mcp-server"
+filesystem_root_windows = "C:\\Users\\Zappro\\repos\\codex-mcp-server"
+wsl_distro = "Ubuntu-24.04"
+wsl_user = "will"
+
+[codex]
+personality = "pragmatic"
+model = "gpt-5.4"
+model_reasoning_effort = "xhigh"
+hide_full_access_warning = true
+
+[codex.model_migrations]
+gpt-5-codex = "gpt-5.3-codex"
+
+[codex.model_availability_nux]
+"gpt-5.3-codex-spark" = 4
+
+[codex.trusted_projects.wsl]
+paths = [
+  "/mnt/c/Users/Zappro/repos/01-monorepo",
+  "/mnt/c/Users/Zappro/repos",
+  "/mnt/c/Users/Zappro",
+]
+
+[codex.trusted_projects.windows]
+paths = [
+  "C:\\Users\\Zappro\\repos\\01-monorepo",
+  "C:\\Users\\Zappro\\repos",
+  "C:\\Users\\Zappro",
+]
+
+[profiles.platform]
+servers = ["future-agents-local", "docker", "git", "fetch", "redis"]
+
+[profiles.factory]
+servers = [
+  "future-agents-local",
+  "docker",
+  "git",
+  "fetch",
+  "redis",
+  "filesystem",
+  "context7",
+  "tavily",
+  "TestSprite",
+  "chrome-devtools",
+  "ai-context",
+]
+
+[profiles.project]
+servers = [
+  "future-agents-local",
+  "docker",
+  "filesystem",
+  "context7",
+  "tavily",
+  "TestSprite",
+  "chrome-devtools",
+  "ai-context",
+]
+
+[targets.codex_wsl]
+format = "codex_toml"
+profile = "factory"
+output = "bootstrap/templates/codex-wsl-managed.toml"
+
+[targets.codex_windows_toml]
+format = "codex_toml"
+profile = "factory"
+output = "bootstrap/templates/codex-windows-managed.toml"
+
+[targets.codex_windows_json]
+format = "json_mcp"
+profile = "factory"
+output = "bootstrap/templates/codex-windows-managed.json"
+
+[targets.claude_desktop]
+format = "json_mcp"
+profile = "factory"
+output = "bootstrap/templates/claude-desktop-managed.json"
+
+[targets.project_mcp]
+format = "json_mcp"
+profile = "project"
+output = "bootstrap/templates/project-managed.mcp.json"
+
+[servers.git]
+package = "@cyanheads/git-mcp-server@2.10.0"
+startup_timeout_sec = 30
+
+[servers.git.surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "@cyanheads/git-mcp-server@2.10.0"]
+
+[servers.git.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "@cyanheads/git-mcp-server@2.10.0"]
+
+[servers.git.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "@cyanheads/git-mcp-server@2.10.0"]
+
+[servers.git.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "@cyanheads/git-mcp-server@2.10.0"]
+
+[servers.filesystem]
+package = "@modelcontextprotocol/server-filesystem@2026.1.14"
+startup_timeout_sec = 30
+
+[servers.filesystem.surfaces.codex_wsl]
+command = "npx"
+args = [
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.1.14",
+  "{{filesystem_root_wsl}}",
+  "{{projects_base_wsl}}",
+]
+
+[servers.filesystem.surfaces.codex_windows_toml]
+command = "npx"
+args = [
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.1.14",
+  "{{filesystem_root_windows}}",
+  "{{projects_base_windows}}",
+]
+
+[servers.filesystem.surfaces.codex_windows_json]
+command = "npx"
+args = [
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.1.14",
+  "{{filesystem_root_windows}}",
+  "{{projects_base_windows}}",
+]
+
+[servers.filesystem.surfaces.claude_desktop]
+command = "npx"
+args = [
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.1.14",
+  "{{filesystem_root_windows}}",
+  "{{projects_base_windows}}",
+]
+
+[servers.filesystem.surfaces.project_mcp]
+command = "npx"
+args = [
+  "-y",
+  "@modelcontextprotocol/server-filesystem@2026.1.14",
+  "{{project_root}}",
+]
+
+[servers.context7]
+package = "@upstash/context7-mcp@2.1.2"
+startup_timeout_sec = 30
+template_note = "Provide CONTEXT7_API_KEY via env/.env, secret overlay, or process environment."
+secret_env_candidates = { CONTEXT7_API_KEY = ["CONTEXT7_API_KEY"] }
+
+[servers.context7.surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+
+[servers.context7.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+
+[servers.context7.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+
+[servers.context7.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+
+[servers.context7.surfaces.project_mcp]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+
+[servers.tavily]
+package = "tavily-mcp@0.2.17"
+startup_timeout_sec = 30
+template_note = "Provide TAVILY_API_KEY via env/.env, secret overlay, or process environment."
+secret_env_candidates = { TAVILY_API_KEY = ["TAVILY_API_KEY"] }
+
+[servers.tavily.surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+
+[servers.tavily.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+
+[servers.tavily.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+
+[servers.tavily.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+
+[servers.tavily.surfaces.project_mcp]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+
+[servers.TestSprite]
+package = "@testsprite/testsprite-mcp@0.0.30"
+startup_timeout_sec = 30
+template_note = "Provide TESTSPRITE_API_KEY via env/.env, secret overlay, or process environment."
+secret_env_candidates = { API_KEY = ["TESTSPRITE_API_KEY", "API_KEY"] }
+
+[servers.TestSprite.surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+
+[servers.TestSprite.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+
+[servers.TestSprite.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+
+[servers.TestSprite.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+
+[servers.TestSprite.surfaces.project_mcp]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+
+[servers."chrome-devtools"]
+package = "chrome-devtools-mcp@0.19.0"
+startup_timeout_sec = 20
+
+[servers."chrome-devtools".surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+
+[servers."chrome-devtools".surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+runtime_env_keys = ["SystemRoot", "PROGRAMFILES"]
+
+[servers."chrome-devtools".surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+runtime_env_keys = ["SystemRoot", "PROGRAMFILES"]
+
+[servers."chrome-devtools".surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+runtime_env_keys = ["SystemRoot", "PROGRAMFILES"]
+
+[servers."chrome-devtools".surfaces.project_mcp]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+
+[servers."ai-context"]
+package = "@ai-coders/context@0.7.1"
+startup_timeout_sec = 30
+
+[servers."ai-context".surfaces.codex_wsl]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+
+[servers."ai-context".surfaces.codex_windows_toml]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+
+[servers."ai-context".surfaces.codex_windows_json]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+
+[servers."ai-context".surfaces.claude_desktop]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+
+[servers."ai-context".surfaces.project_mcp]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+
+[servers."future-agents-local"]
+package = "workspace.mcp.server"
+startup_timeout_sec = 120
+
+[servers."future-agents-local".surfaces.codex_wsl]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+
+[servers."future-agents-local".surfaces.codex_windows_toml]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+
+[servers."future-agents-local".surfaces.codex_windows_json]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+
+[servers."future-agents-local".surfaces.claude_desktop]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+
+[servers."future-agents-local".surfaces.project_mcp]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+
+[servers.docker]
+package = "workspace.mcp.docker_server"
+startup_timeout_sec = 40
+
+[servers.docker.surfaces.codex_wsl]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+
+[servers.docker.surfaces.codex_windows_toml]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+
+[servers.docker.surfaces.codex_windows_json]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+
+[servers.docker.surfaces.claude_desktop]
+command = "wsl.exe"
+args = ["-d", "{{wsl_distro}}", "bash", "--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+
+[servers.docker.surfaces.project_mcp]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd {{repo_root_wsl}} && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+
+[servers.redis]
+package = "@modelcontextprotocol/server-redis@2025.4.25"
+startup_timeout_sec = 40
+
+[servers.redis.surfaces.codex_wsl]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-redis@2025.4.25", "redis://127.0.0.1:6380"]
+
+[servers.redis.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-redis@2025.4.25", "redis://127.0.0.1:6380"]
+
+[servers.redis.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-redis@2025.4.25", "redis://127.0.0.1:6380"]
+
+[servers.redis.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-redis@2025.4.25", "redis://127.0.0.1:6380"]
+
+[servers.fetch]
+package = "mcp-server-fetch==2025.4.7"
+startup_timeout_sec = 20
+
+[servers.fetch.surfaces.codex_wsl]
+command = "uvx"
+args = ["mcp-server-fetch==2025.4.7"]
+
+[servers.fetch.surfaces.codex_windows_toml]
+command = "npx"
+args = ["-y", "mcp-server-fetch"]
+
+[servers.fetch.surfaces.codex_windows_json]
+command = "npx"
+args = ["-y", "mcp-server-fetch"]
+
+[servers.fetch.surfaces.claude_desktop]
+command = "npx"
+args = ["-y", "mcp-server-fetch"]

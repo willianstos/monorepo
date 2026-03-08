@@ -7,6 +7,8 @@ This directory stores auditable environment templates for the monorepo and for t
 Current intent:
 
 - `env/.env.example` is the canonical template for workspace defaults plus the local Gitea stack contract.
+- `bootstrap/mcp-registry.toml` defines MCP server inventory and client-specific rendering rules.
+- `bootstrap/render_mcp_configs.py` resolves MCP secrets from process env, then `env/.env`, then ignored local overlays.
 - Live secrets must stay outside the repo in the operational `.env` owned by the WSL stack.
 - Placeholder markers such as `__generate_strong_secret__` must be replaced in the live `.env`, never committed as real values.
 

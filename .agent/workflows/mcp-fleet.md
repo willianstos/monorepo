@@ -2,7 +2,7 @@
 ---
 description: Converge a configuração de servidores MCP em todas as superfícies — Claude Code CLI, Codex WSL, Codex Windows e Claude Desktop — em uma única execução.
 trigger: /mcp-fleet
-args: "[--dry-run] [--scope all|claude-code|codex-wsl|codex-windows|claude-desktop]"
+args: "[--dry-run] [--scope all|windows|wsl|projects|codex|claude-desktop]"
 runner: any
 version: 3.0.0
 ---
@@ -10,7 +10,7 @@ version: 3.0.0
 ## O que é
 
 Workflow operacional para convergência em lote dos servidores MCP do home lab.
-Aplica e verifica o inventário canônico definido em [`docs/mcp-homelab-servers.md`](../../docs/mcp-homelab-servers.md) nas quatro superfícies:
+Aplica e verifica o inventário canônico definido em [`bootstrap/mcp-registry.toml`](../../bootstrap/mcp-registry.toml) nas quatro superfícies:
 
 | Superfície | Arquivo alvo |
 |-----------|-------------|
@@ -60,19 +60,22 @@ Versões pinadas são obrigatórias para dependências externas. Servidores MCP 
 ```text
 /mcp-fleet
 /mcp-fleet --dry-run --scope all
-/mcp-fleet --scope claude-code
-/mcp-fleet --scope codex-wsl
+/mcp-fleet --scope codex
+/mcp-fleet --scope wsl
+/mcp-fleet --scope windows
+/mcp-fleet --scope projects
+/mcp-fleet --scope claude-desktop
 ```
 
 ## Fluxo
 
-1. **Leitura do inventário** — carregar tabela de `docs/mcp-homelab-servers.md` e `.agent/rules/MCP_SERVERS.md`.
+1. **Leitura do inventário** — carregar `bootstrap/mcp-registry.toml` e `.agent/rules/MCP_SERVERS.md`.
 2. **Verificação por superfície** — para cada alvo no escopo, comparar servidores presentes e versões com o inventário.
 3. **Convergência** (se não `--dry-run`):
-   - Claude Code CLI: `claude mcp remove <name> -s user` + `claude mcp add <name> -s user -- <cmd> [args]`
-   - Codex WSL / Windows: atualizar os templates canônicos em `bootstrap/templates/` e reaplicar com `bootstrap/codex-governance-wsl.sh` ou `bootstrap/codex-governance.ps1`; no Windows, alinhar também `config.json` legado se ele existir.
-   - Claude Desktop: editar `claude_desktop_config.json` atualizando entradas em `mcpServers`.
-   - Preservar campos não conhecidos em todos os arquivos.
+   - Renderizar `bootstrap/templates/` com `python3 bootstrap/render_mcp_configs.py templates`
+   - Codex WSL / Windows / Claude Desktop: reaplicar com `bootstrap/codex-governance-wsl.sh` ou `bootstrap/codex-governance.ps1`
+   - Project `.mcp.json`: reaplicar com `bootstrap/render_mcp_configs.py apply --target project_mcp --projects-root ...`
+   - Preservar campos não conhecidos nos JSON gerenciados.
 4. **Resumo de estado**:
    - Superfícies aplicadas
    - Itens adicionados / atualizados / já alinhados / ignorados
@@ -86,7 +89,7 @@ Versões pinadas são obrigatórias para dependências externas. Servidores MCP 
 - **Versões pinadas são obrigatórias** para todos os pacotes com distribuição npm/PyPI estável.
 - Servidores MCP locais do repositório devem sempre iniciar com `bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-..."`.
 - `future-agents-local` deve ter `startup_timeout_sec = 120`; `docker` e `redis`, `40`.
-- Evitar edição direta de `~/.codex/config.toml` e `C:\Users\Zappro\.codex\config.toml`; usar os scripts de governança.
+- Evitar edição direta de `~/.codex/config.toml` e `C:\Users\Zappro\.codex\config.toml`; usar o renderer e os scripts de governança.
 - Nunca gravar secrets ou API keys em texto plano nos arquivos alvo — usar `env` inline no TOML/JSON apenas para keys já existentes.
 - Se variáveis de ambiente de API key não estiverem presentes, manter valores existentes — nunca forçar criação.
 - Não executar push, merge ou gates de PR.
@@ -104,8 +107,9 @@ Versões pinadas são obrigatórias para dependências externas. Servidores MCP 
 - [ ] `claude mcp list` mostra 11 servidores: `docker`, `git`, `fetch`, `redis`, `filesystem`, `context7`, `tavily`, `TestSprite`, `chrome-devtools`, `ai-context`, `future-agents-local`.
 - [ ] `~/.codex/config.toml` (WSL) tem os 11 servidores com versões pinadas.
 - [ ] `C:\Users\Zappro\.codex\config.toml` tem os 11 servidores com versões pinadas.
-- [ ] `C:\Users\Zappro\.codex\config.json`, se existir, está alinhado para `future-agents-local` e `docker`.
+- [ ] `C:\Users\Zappro\.codex\config.json`, se existir, está alinhado com o inventário gerado do registro MCP.
 - [ ] `claude_desktop_config.json` tem os 11 servidores; `future-agents-local` e `docker` usam `wsl.exe`.
+- [ ] `bootstrap/templates/` foi regenerado a partir de `bootstrap/mcp-registry.toml`.
 - [ ] Nenhuma dependência externa ficou sem versão pinada.
 - [ ] Nenhum secret novo gravado em texto plano.
 - [ ] `docker ps` executa sem erro de socket.

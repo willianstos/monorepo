@@ -1,0 +1,72 @@
+{
+  "mcpServers": {
+    "future-agents-local": {
+      "command": "bash",
+      "args": [
+        "--noprofile",
+        "--norc",
+        "-lc",
+        "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-future-agents.sh"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "docker": {
+      "command": "bash",
+      "args": [
+        "--noprofile",
+        "--norc",
+        "-lc",
+        "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-docker.sh"
+      ],
+      "env": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem@2026.1.14",
+        "__PROJECT_ROOT__"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@2.1.2"
+      ]
+    },
+    "tavily": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tavily-mcp@0.2.17"
+      ]
+    },
+    "TestSprite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@testsprite/testsprite-mcp@0.0.30"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@0.19.0"
+      ]
+    },
+    "ai-context": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@ai-coders/context@0.7.1",
+        "mcp"
+      ]
+    }
+  }
+}

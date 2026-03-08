@@ -1,0 +1,91 @@
+# Generated from bootstrap/mcp-registry.toml.
+# Edit the registry, not this file.
+
+personality = "pragmatic"
+model = "gpt-5.4"
+model_reasoning_effort = "xhigh"
+
+[core]
+projectsBase = "/mnt/c/Users/Zappro/repos"
+
+[mcp]
+enabled = true
+include = "/mnt/c/Users/Zappro/repos/codex-mcp-server/.mcp"
+
+[projects."/mnt/c/Users/Zappro/repos/01-monorepo"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/Zappro/repos"]
+trust_level = "trusted"
+
+[projects."/mnt/c/Users/Zappro"]
+trust_level = "trusted"
+
+[notice]
+hide_full_access_warning = true
+
+[notice.model_migrations]
+gpt-5-codex = "gpt-5.3-codex"
+
+[tui.model_availability_nux]
+"gpt-5.3-codex-spark" = 4
+
+[mcp_servers."future-agents-local"]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-future-agents.sh"]
+env = { PYTHONUNBUFFERED = "1" }
+startup_timeout_sec = 120
+
+[mcp_servers."docker"]
+command = "bash"
+args = ["--noprofile", "--norc", "-lc", "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-docker.sh"]
+env = { DOCKER_HOST = "unix:///var/run/docker.sock" }
+startup_timeout_sec = 40
+
+[mcp_servers."git"]
+command = "npx"
+args = ["-y", "@cyanheads/git-mcp-server@2.10.0"]
+startup_timeout_sec = 30
+
+[mcp_servers."fetch"]
+command = "uvx"
+args = ["mcp-server-fetch==2025.4.7"]
+startup_timeout_sec = 20
+
+[mcp_servers."redis"]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-redis@2025.4.25", "redis://127.0.0.1:6380"]
+startup_timeout_sec = 40
+
+[mcp_servers."filesystem"]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "/mnt/c/Users/Zappro/repos/codex-mcp-server", "/mnt/c/Users/Zappro/repos"]
+startup_timeout_sec = 30
+
+# Provide CONTEXT7_API_KEY via env/.env, secret overlay, or process environment.
+[mcp_servers."context7"]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@2.1.2"]
+startup_timeout_sec = 30
+
+# Provide TAVILY_API_KEY via env/.env, secret overlay, or process environment.
+[mcp_servers."tavily"]
+command = "npx"
+args = ["-y", "tavily-mcp@0.2.17"]
+startup_timeout_sec = 30
+
+# Provide TESTSPRITE_API_KEY via env/.env, secret overlay, or process environment.
+[mcp_servers."TestSprite"]
+command = "npx"
+args = ["-y", "@testsprite/testsprite-mcp@0.0.30"]
+startup_timeout_sec = 30
+
+[mcp_servers."chrome-devtools"]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@0.19.0"]
+startup_timeout_sec = 20
+
+[mcp_servers."ai-context"]
+command = "npx"
+args = ["--yes", "@ai-coders/context@0.7.1", "mcp"]
+startup_timeout_sec = 30

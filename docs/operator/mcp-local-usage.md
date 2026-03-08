@@ -19,10 +19,19 @@ The Epic 1 MCP server is a local stdio server that exposes bounded scheduler and
 Run from the repository root:
 
 ```bash
-python -m workspace.mcp.server --transport stdio
+python3 -m workspace.mcp.server --transport stdio
 ```
 
 Epic 1 supports stdio only. HTTP/SSE remains out of scope.
+
+When registering this server in Codex, Claude Code, or Claude Desktop, prefer a deterministic launcher:
+
+```bash
+bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-future-agents.sh"
+```
+
+That avoids shell-profile side effects during MCP startup and keeps the working directory pinned to the repository root.
+In this repository, those launchers are referenced from `bootstrap/mcp-registry.toml` and rendered into client-specific config by `bootstrap/render_mcp_configs.py`.
 
 ## Tool Behavior
 
@@ -41,6 +50,6 @@ Epic 1 supports stdio only. HTTP/SSE remains out of scope.
 
 1. Start Redis and the normal local runtime pieces you already use.
 2. Start the MCP server with the stdio command above.
-3. Register that command with your MCP-capable client.
+3. Register that command with your MCP-capable client, making sure the client starts from the repository root.
 4. Use read tools first.
 5. Treat write tools as queued requests, not synchronous authority.
