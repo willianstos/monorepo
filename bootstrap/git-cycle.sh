@@ -4,12 +4,13 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  bash bootstrap/git-cycle.sh [--dry-run] [--merge-main] "dd/mm/aaaa" "nome-randomico"
+  bash bootstrap/git-cycle.sh [--dry-run] [--merge-main] [--scope <path1,path2,...>] [--allow-wide-merge] "dd/mm/aaaa" "nome-randomico"
   bash bootstrap/git-cycle.sh --cleanup-smoke
 
 Examples:
   bash bootstrap/git-cycle.sh "06/03/2026" "atlas-raven"
-  bash bootstrap/git-cycle.sh --merge-main "06/03/2026" "atlas-raven"
+  bash bootstrap/git-cycle.sh --merge-main --scope ".agent/workflows,.agent/rules" "06/03/2026" "atlas-raven"
+  bash bootstrap/git-cycle.sh --merge-main --allow-wide-merge "06/03/2026" "atlas-raven"
   bash bootstrap/git-cycle.sh --dry-run "06/03/2026" "atlas-raven"
   bash bootstrap/git-cycle.sh --cleanup-smoke
 EOF
@@ -23,6 +24,72 @@ slugify() {
 
 random_hex() {
   openssl rand -hex 3
+}
+
+is_in_merge_scope() {
+  local path="$1"
+  local scope
+  local -a scopes
+
+  IFS=',' read -r -a scopes <<< "$merge_scope_csv"
+  for scope in "${scopes[@]}"; do
+    scope="${scope// /}"
+    [ -z "$scope" ] && continue
+    case "$path" in
+      "$scope"|"$scope"/*)
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+check_merge_scope() {
+  local base_ref
+  local path
+  local -a out_of_scope
+  local -a scope_list
+
+  if [ -z "$merge_scope_csv" ]; then
+    if [ "$allow_wide_merge" = true ]; then
+      return 0
+    fi
+
+    echo "Refusing --merge-main: merge scope is not explicit." >&2
+    echo "Pass --scope <path1,path2,...> (for example: --scope ".agent/workflows,.agent/rules")." >&2
+    echo "If this is an approved full-merge, pass --allow-wide-merge explicitly." >&2
+    exit 1
+  fi
+
+  IFS=',' read -r -a scope_list <<< "$merge_scope_csv"
+  if [ "${#scope_list[@]}" -eq 0 ]; then
+    echo "Refusing --merge-main: --scope is empty." >&2
+    exit 1
+  fi
+
+  if git show-ref --verify --quiet "refs/remotes/origin/main"; then
+    base_ref="origin/main"
+  else
+    base_ref="main"
+  fi
+
+  while IFS= read -r path; do
+    [ -z "$path" ] && continue
+    if ! is_in_merge_scope "$path"; then
+      out_of_scope+=("$path")
+    fi
+  done < <(git diff --name-only --diff-filter=ACDMRTUXB "$base_ref"..."$start_branch")
+
+  if [ "${#out_of_scope[@]}" -gt 0 ]; then
+    echo "Refusing --merge-main: branch scope does not match requested merge scope." >&2
+    echo "scope: $merge_scope_csv" >&2
+    echo "files outside scope:" >&2
+    printf '  %s\n' "${out_of_scope[@]}" >&2
+    exit 1
+  fi
+
+  log_note "merge scope check passed for scope: $merge_scope_csv"
 }
 
 require_wsl() {
@@ -177,6 +244,8 @@ dry_run=false
 cleanup_smoke=false
 merge_main=false
 action_name="checkpoint"
+merge_scope_csv=""
+allow_wide_merge=false
 date_label=""
 name_label=""
 checkpoint_label=""
@@ -204,6 +273,19 @@ while [ "$#" -gt 0 ]; do
     --merge-main)
       merge_main=true
       action_name="merge-main"
+      shift
+      ;;
+    --scope)
+      if [ $# -lt 2 ]; then
+        echo "Missing --scope argument." >&2
+        usage >&2
+        exit 1
+      fi
+      merge_scope_csv="$2"
+      shift 2
+      ;;
+    --allow-wide-merge)
+      allow_wide_merge=true
       shift
       ;;
     --cleanup-smoke)
@@ -311,9 +393,19 @@ elif [ "$merge_main" = true ]; then
   log_note 'dry-run: skipped'
 fi
 
+if [ "$merge_main" = true ] && [ -n "$(git status --porcelain)" ]; then
+  echo "Refusing --merge-main on a dirty branch." >&2
+  echo "Run /git without --merge-main first to checkpoint scope changes, then run --merge-main." >&2
+  exit 1
+fi
+
 if [ -n "$(git status --porcelain)" ]; then
   run_cmd git add -A
   run_cmd git commit -m "chore(repo): checkpoint ${checkpoint_label}"
+fi
+
+if [ "$merge_main" = true ]; then
+  check_merge_scope
 fi
 
 run_cmd git push -u origin "$start_branch" || log_note "Warning: failed to push to origin"

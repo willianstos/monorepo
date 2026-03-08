@@ -2,7 +2,7 @@
 ---
 description: WSL-first Git workflow for checkpointing and synchronizing feature branches.
 trigger: /git
-args: "[--merge-main] {dd/mm/aaaa} {branch-slug}"
+args: "[--merge-main] [--scope <paths>] [--allow-wide-merge] {dd/mm/aaaa} {branch-slug}"
 runner: wsl
 version: 3.1.0
 ---
@@ -54,7 +54,13 @@ bash bootstrap/git-cycle.sh --dry-run "<dd/mm/aaaa>" "<branch-slug>"
 Explicit merge into `main` after CI, review, and human approval:
 
 ```bash
-bash bootstrap/git-cycle.sh --merge-main "<dd/mm/aaaa>" "<branch-slug>"
+bash bootstrap/git-cycle.sh --merge-main --scope ".agent/workflows,.agent/rules" "<dd/mm/aaaa>" "<branch-slug>"
+```
+
+For an approved full-branch merge (rare):
+
+```bash
+bash bootstrap/git-cycle.sh --merge-main --allow-wide-merge "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
 Cleanup merged smoke branches:
@@ -66,8 +72,11 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 ## Flow
 
 1. **Checkpoint**: creates a commit if the branch is dirty.
-2. **Sync**: pushes the active branch to Gitea and the GitHub mirror.
-3. **Record**: logs execution details in `.context/runs/git/`.
+2. **Scope check**: on `--merge-main`, requires one of:
+   - explicit path scope via `--scope` (recommended), or
+   - `--allow-wide-merge` with explicit human approval.
+3. **Sync**: pushes the active branch to Gitea and the GitHub mirror.
+4. **Record**: logs execution details in `.context/runs/git/`.
 
 ## Outputs
 
@@ -79,6 +88,8 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 - **WSL-only**: run from WSL.
 - **No default merge**: `/git` does not imply merge to `main`.
 - **PR path remains mandatory**: use Gitea PR review plus CI and human approval before merging to `main`.
+- **Merge scope guard**: `--merge-main` requires explicit scope by default (`--scope`), except `--allow-wide-merge` for approved cross-cutting changes.
+- **Scope of change**: `--merge-main` now refuses to run on a dirty branch; checkpoint first with `/git` plain mode.
 - **State evidence**: run history lives under `.context/runs/git/` and `.context/workflow/`.
 
 ## Contract

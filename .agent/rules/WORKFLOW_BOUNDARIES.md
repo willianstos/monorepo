@@ -18,3 +18,9 @@ The split between executable workflow guidance and state/evidence artifacts.
 
 - `.context/runs/`: execution evidence, including `/git` artifacts.
 - `.context/workflow/`: workflow-state snapshots and execution history.
+
+## Governance de Merge
+
+- Mudança de escopo único deve ficar em branch dedicada.
+- `--merge-main` em `bootstrap/git-cycle.sh` exige `--scope` explícito por padrão.
+- `--allow-wide-merge` fica restrito a decisões de merge aprovadas, com evidência em `.context/runs/git/`.

@@ -20,6 +20,7 @@ Cadeia canônica de Git:
 - Abra branches curtas a partir da `main` atual.
 - Prefixos esperados: `feature/*`, `fix/*`, `chore/*`.
 - Mantenha a branch focada em uma mudança revisável.
+- Use escopo único por branch (ex.: somente `.agent/workflows` para documentação de fluxo).
 
 ## Fluxo Canônico
 
@@ -30,6 +31,7 @@ Cadeia canônica de Git:
 5. Abra o PR na Gitea contra `main`.
 6. Aguarde CI verde e aprovação humana.
 7. Faça o merge somente pela rota protegida da Gitea.
+   - Se precisar antecipar merge em branch de trabalho para revisão formal, use `/git --merge-main --scope ...`.
 
 ## O Que `/git` Faz
 
@@ -45,12 +47,14 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 - Não substitui revisão, CI ou aprovação humana.
 - Não autoriza push direto para `main`.
 - Não transforma `--merge-main` em bypass de proteção.
+- `--merge-main` sem `--scope` é bloqueado; use `--allow-wide-merge` apenas para casos aprovados de mudança transversal.
 
 ## Regras de Merge
 
 - Push direto para `main` está fora do fluxo canônico.
 - Merge exige PR na Gitea, checks obrigatórios verdes e aprovação humana registrada.
 - `--merge-main` continua subordinado às mesmas proteções documentadas.
+- `--merge-main` exige branch limpa no momento da operação para evitar commit automático acidental.
 
 ## Modelo Mental
 
