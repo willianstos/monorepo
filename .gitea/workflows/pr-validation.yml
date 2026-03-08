@@ -103,7 +103,7 @@ jobs:
       - name: Run Redis integration tests
         env:
           REDIS_INTEGRATION_HOST: "127.0.0.1"
-          REDIS_INTEGRATION_PORT: "6381"
+          REDIS_INTEGRATION_PORT: "6379"
           REDIS_INTEGRATION_DB: "15"
         run: >-
           python3 -m pytest
