@@ -3,26 +3,19 @@
 ## Identity
 
 - Repository: `01-monorepo` / `01-monolito`
-- Mode: local-first AI coding assistant workspace
+- Purpose: local-first AI coding assistant workspace
 - Maturity: release candidate for local controlled operation
-- Canonical repo-wide contract: `AGENTS.md`
+- Contract: `AGENTS.md`
 
 ## Canonical References
 
-- `AGENTS.md`
-- `CLAUDE.md`
-- `.claude/CLAUDE.md`
-- `docs/model-routing.md`
-- `docs/local-model-policy.md`
-- `GUARDRAILS.md`
+- `AGENTS.md`, `GUARDRAILS.md`
+- `CLAUDE.md`, `.claude/CLAUDE.md`
+- `docs/model-routing.md`, `docs/local-model-policy.md`
 
-## Stable Model Split
+Shared operator rules: `.agent/`. Generated state: `.context/`.
 
-- Codex: primary implementation engine
-- Claude Code: primary planning, architecture, deep debugging, and review assistance
-- Ollama `qwen3.5:9b`: helper-only and non-authoritative
-
-## Memory Tips
+## Memory Conventions
 
 - Save durable facts and decisions only.
-- Prefer one short distilled note over many session fragments.
+- One short distilled note over many session fragments.

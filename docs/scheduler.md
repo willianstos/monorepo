@@ -1,139 +1,53 @@
 # Scheduler
 
-> Last Updated: 06/03/2026
+Orchestration service for the Future Agents workspace. Separate from agents and separate from the model gateway.
 
-## Purpose
-
-The scheduler is the orchestration service for the local-first AI coding assistant workspace. It is separate from agents and separate from the local model gateway.
-
-The current implementation runs an event loop over Redis Streams, rebuilds workflow state from Redis, and enforces guardrails before dispatch and before task state transitions.
+Stateless by contract. Runs an event loop over Redis Streams, rebuilds workflow state from Redis on each event, and enforces guardrails before dispatch and before state transitions.
 
 ## Components
 
-- `service.py`
-- `dag_builder.py`
-- `dag_store.py`
-- `dispatcher.py`
-- `ci_handler.py`
-- `guardrail_enforcer.py`
+`service.py`, `dag_builder.py`, `dag_store.py`, `dispatcher.py`, `ci_handler.py`, `guardrail_enforcer.py`
 
-## Redis Responsibilities
+## Redis
 
-Streams:
+**Streams:** `agent_tasks`, `agent_results`, `ci_events`, `memory_events`, `system_events`
 
-- `agent_tasks`
-- `agent_results`
-- `ci_events`
-- `memory_events`
-- `system_events`
-
-State keys:
-
-- `dag:{graph_id}`
-- `dag_tasks:{graph_id}`
-- `task:{task_id}`
-- `taskdeps:{task_id}`
-- `taskstatus:{task_id}`
+**State keys:** `dag:{graph_id}`, `dag_tasks:{graph_id}`, `task:{task_id}`, `taskdeps:{task_id}`, `taskstatus:{task_id}`
 
 ## Event Handling
 
-`issue_created`
+| Event | Behavior |
+|-------|----------|
+| `issue_created` | Build default DAG, persist in Redis, dispatch `plan_task` |
+| `task_completed` | Mark complete, re-evaluate dependencies, dispatch next if guardrails allow. Reject invalid transitions. |
+| `task_failed` | Increment retry, requeue until limit, then `system_alert` + dead-letter. Reviewer failures block immediately. |
+| `ci_failed` / `coverage_failed` / `security_failed` | Update CI status, create fix loop, keep downstream blocked. Emit `audit_log`. |
+| `ci_passed` | Release CI-gated tasks. Complete `rerun_ci` only if `fix_task` is done and `rerun_ci` is running. |
 
-- must build the default DAG
-- must persist graph and tasks in Redis
-- must dispatch the ready `plan_task`
+## CI Ingress
 
-`task_completed`
-
-- must mark the task complete
-- must re-evaluate dependencies
-- must dispatch the next ready work item if guardrails allow
-- must reject invalid transitions such as completing a task that never entered `running`
-
-`task_failed`
-
-- must increment retry count
-- must requeue the task until `max_retry_limit`
-- must emit `system_alert` and dead-letter the task after retry exhaustion
-- reviewer failures may block progression immediately instead of requeueing
-
-`ci_failed`, `coverage_failed`, `security_failed`
-
-- must update CI status in Redis
-- must create a fix loop
-- must keep downstream tasks blocked until `ci_passed`
-- must emit `audit_log` for accepted handling and invalid ordering
-
-`ci_passed`
-
-- must release CI-gated tasks such as `review_task`, `human_approval_gate`, and `merge_task`
-- must only complete `rerun_ci` if the latest `fix_task` is already completed and `rerun_ci` is already running
+External CI systems publish `ci_*` events to `ci_events`; they do not call agents directly. In the current release-candidate path, those producers are simulated locally, but the scheduler contract is unchanged.
 
 ## Human Approval
 
-The scheduler never merges automatically.
+The scheduler never merges automatically. At `human_approval_gate`, it publishes `human_approval_required` and waits for external completion. Non-approved results keep the graph blocked.
 
-When the DAG reaches `human_approval_gate`, the scheduler publishes `human_approval_required` to `system_events` and waits for an external completion event before releasing `merge_task`.
-If the approval result is anything other than `approved`, the graph remains blocked and `merge_task` stays undispatched.
-Local `/git` checkpoints on feature branches do not bypass this merge gate.
-
-Trusted approval completion must use:
-
-- `source="system"`
-- `payload.approval_source` in `{"human", "system"}`
-- `payload.approval_status`
-- `payload.approval_actor` when `approval_source="human"`
+Trusted completion requires `source="system"`, `payload.approval_source` in `{"human", "system"}`, `payload.approval_status`, and `payload.approval_actor` when human.
 
 ## Audit Trail
 
-`audit_log` is the structured trace event carried on `system_events`.
+`audit_log` on `system_events`. Every payload includes: `event_id`, `correlation_id`, `graph_id`, `task_id`, `source`, `task_type`, `previous_status`, `next_status`, `reason`, `category`, `result`.
 
-Every audit payload includes:
+Emitted for: accepted/rejected transitions, guardrail rejections, trusted-source violations, merge-gate blocks, CI handling, duplicate-event suppression.
 
-- `event_id`
-- `correlation_id`
-- `graph_id`
-- `task_id`
-- `source`
-- `task_type`
-- `previous_status`
-- `next_status`
-- `reason`
-- `category`
-- `result`
+## Idempotency
 
-The scheduler emits `audit_log` for accepted and rejected transitions, guardrail rejections, trusted-source violations, merge-gate blocks, CI handling, and duplicate-event suppression.
+Processed event IDs persist in Redis; duplicates are ignored before mutation. Counters in `scheduler:metrics`, throughput in `scheduler:throughput`. `AssistantRuntime.scheduler_health_report()` returns an operator-friendly snapshot.
 
-## Idempotency And Observability
+## Memory Runtime
 
-- processed scheduler event IDs are persisted in Redis and duplicates are ignored before state mutation
-- scheduler counters live in `scheduler:metrics`
-- per-stage throughput lives in `scheduler:throughput`
-- `AssistantRuntime.scheduler_health_report()` returns an operator-friendly snapshot of those counters plus backlog and blocking hints
-
-## Runtime Memory Path
-
-`memory_events` now accepts `memory_write_requested`.
-
-- raw transcript-style fields are rejected at runtime
-- only structured `MemoryRecord` payloads are accepted
-- accepted records are persisted to Redis-backed memory keys scoped by project, graph, and task
-- rejection emits both `system_alert` and `audit_log`
+`memory_events` accepts `memory_write_requested`. Raw transcripts rejected. Only structured `MemoryRecord` payloads accepted. Persisted to Redis-backed keys scoped by project, graph, and task. Rejection emits `system_alert` + `audit_log`.
 
 ## Guardrails
 
-The scheduler enforces:
-
-- coder cannot touch tests
-- coder cannot touch CI config
-- tester owns tests and fixtures
-- tester may not edit implementation files
-- reviewer owns review decisions
-- reviewer may block progression
-- CI cannot be bypassed
-- merge requires human approval
-- feature-branch Git checkpoints remain an operator workflow, but are not yet machine-attested by the scheduler
-- system-owned tasks require trusted completion sources
-- direct agent-to-agent calls are forbidden
-- push to `main` is forbidden
-- raw conversation payloads are forbidden for memory storage
+Coder cannot touch tests or CI config. Tester owns tests and fixtures only. Reviewer may block progression. CI cannot be bypassed. Merge requires human approval. System-owned tasks require trusted completion sources. Direct agent-to-agent calls forbidden. Push to `main` forbidden. Raw conversation payloads forbidden for memory storage.

@@ -1,40 +1,7 @@
-# Agent Handbook
+# Generated Agent Templates
 
-> Last Updated: 2026-03-06
+Compatibility pointer. Non-authoritative.
 
-This directory contains ready-to-customize playbooks for AI agents collaborating on the repository.
+Contains generated prompt templates and scaffolds for reference only. The only primary execution agents are `planner`, `coder`, `tester`, and `reviewer` as defined in [`AGENTS.md`](../../AGENTS.md).
 
-## Available Agents
-- [Code Reviewer](./code-reviewer.md) — Review code changes for quality, style, and best practices
-- [Bug Fixer](./bug-fixer.md) — Analyze bug reports and error messages
-- [Feature Developer](./feature-developer.md) — Implement new features according to specifications
-- [Refactoring Specialist](./refactoring-specialist.md) — Identify code smells and improvement opportunities
-- [Test Writer](./test-writer.md) — Write comprehensive unit and integration tests
-- [Documentation Writer](./documentation-writer.md) — Create clear, comprehensive documentation
-- [Performance Optimizer](./performance-optimizer.md) — Identify performance bottlenecks
-- [Security Auditor](./security-auditor.md) — Identify security vulnerabilities
-- [Backend Specialist](./backend-specialist.md) — Design and implement server-side architecture
-- [Frontend Specialist](./frontend-specialist.md) — Design and implement user interfaces
-- [Architect Specialist](./architect-specialist.md) — Design overall system architecture and patterns
-- [Devops Specialist](./devops-specialist.md) — Design and maintain CI/CD pipelines
-- [Database Specialist](./database-specialist.md) — Design and optimize database schemas
-- [Mobile Specialist](./mobile-specialist.md) — Develop native and cross-platform mobile applications
-- [Orchestration Validator](./orchestration-validator.md) — Validate Redis, scheduler, CI ordering, approval, merge, and audit paths
-
-## How To Use These Playbooks
-1. Pick the agent that matches your task.
-2. Enrich the template with project-specific context or links.
-3. Share the final prompt with your AI assistant.
-4. Capture learnings in the relevant documentation file so future runs improve.
-
-## Related Resources
-- [Documentation Index](../docs/README.md)
-- [Agent Knowledge Base](../../AGENTS.md)
-- [Claude Instructions](../../CLAUDE.md)
-- [Contributor Guidelines](../../CONTRIBUTING.md)
-- [Hybrid Environment Audit](../../ENV_AUDIT_WINDOWS_WSL_2026-03-05.md)
-- [Shared Agent Layer](../../.agent/README.md)
-- [Bootstrap Scripts](../../bootstrap/)
-- [Workflow Index](../../.agent/workflows/README.md)
-- [Local Git Workflow](../../.agent/workflows/git.md)
-- [Finish With Git Rule](../../.agent/rules/finish-with-git.md)
+If a template here conflicts with `AGENTS.md`, `.agent/`, `.claude/`, or `docs/`, the canonical source wins.

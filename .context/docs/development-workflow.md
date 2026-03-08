@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Workflow de Desenvolvimento
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md), [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md) e [`../../docs/guide_git.md`](../../docs/guide_git.md) como fontes canônicas.
+
 ## Configuração do Ambiente
 
 1. Crie e ative um ambiente virtual Python 3.11+.
@@ -48,8 +51,8 @@ scaffoldVersion: "2.0.0"
 
 - Mantenha os docs de nível superior alinhados com mudanças na estrutura do repositório.
 - Não descreva o repositório como "apenas placeholders" — os contratos scheduler/event-bus/runtime estão implementados.
-- Vincule novos guias de longa duração a partir de `.context/docs/README.md`.
-- Vincule novas instruções reutilizáveis de agentes a partir de `.context/agents/README.md`.
+- Vincule novos guias canônicos de longa duração em `docs/`, `README.md` ou `WORKSPACE.md`, conforme a camada correta.
+- Use `.context/docs/README.md` e `.context/agents/README.md` apenas como índices ou scaffolds gerados, nunca como fontes canônicas.
 - Inclua payloads de exemplo ou markdown gerado quando esquemas ou scaffolds mudarem materialmente.
 
 ## Expectativas de Validação

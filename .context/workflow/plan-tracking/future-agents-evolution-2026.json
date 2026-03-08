@@ -1,0 +1,112 @@
+{
+  "decisions": [
+    {
+      "title": "Keep Redis Streams as the only internal bus",
+      "description": "MCP servers, the DAG visualizer, and the A2A gateway will be implemented as edge adapters that translate into existing scheduler and memory events. No feature in this roadmap may introduce direct agent-to-agent calls, alternate internal buses, or bypass the Redis-backed DAG state model.",
+      "phase": "P",
+      "alternatives": [
+        "Expose WebSocket or HTTP message passing directly between agents",
+        "Embed orchestration logic inside UI or protocol gateways"
+      ],
+      "status": "accepted",
+      "id": "dec-1772793703232",
+      "decidedAt": "2026-03-06T10:41:43.232Z"
+    },
+    {
+      "title": "Build MCP foundation before A2A and marketplace work",
+      "description": "The first externalization step will be MCP-native scheduler and memory services with stdio and HTTP/SSE transports. A2A and any marketplace-oriented skill distribution will be layered on top only after contracts, approval boundaries, and telemetry are stable.",
+      "phase": "P",
+      "alternatives": [
+        "Implement A2A first and retrofit MCP later",
+        "Start with marketplace packaging before protocol contracts exist"
+      ],
+      "status": "accepted",
+      "id": "dec-1772793703235",
+      "decidedAt": "2026-03-06T10:41:43.235Z"
+    },
+    {
+      "title": "Treat skills as governed manifests, not arbitrary plugins",
+      "description": "The roadmap will reuse the current internal SkillRouter discipline and introduce a manifest-based skill contract. Skill metadata may become first-class, but skills must remain reviewable, policy-bound, and non-authoritative relative to planner, coder, tester, and reviewer roles.",
+      "phase": "P",
+      "alternatives": [
+        "Allow unrestricted plugin execution from skills",
+        "Promote `.agent/skills` catalogs into new runtime agent authorities"
+      ],
+      "status": "accepted",
+      "id": "dec-1772793703238",
+      "decidedAt": "2026-03-06T10:41:43.238Z"
+    },
+    {
+      "title": "MCP remains an edge adapter only",
+      "description": "MCP is accepted only as an outside-core interoperability boundary for governed scheduler and memory capabilities. It may expose operator-facing and IDE-facing entrypoints, but it may not replace Redis Streams, the scheduler, CI authority, or merge approval authority.",
+      "phase": "R",
+      "alternatives": [
+        "Let MCP orchestrate tasks directly inside the repository core",
+        "Use MCP as a second runtime control plane"
+      ],
+      "status": "accepted",
+      "id": "dec-1772807936537",
+      "decidedAt": "2026-03-06T14:38:56.537Z"
+    },
+    {
+      "title": "Worktrees isolate mutable DAG tasks only",
+      "description": "A dedicated worktree is required for concurrent mutable DAG work and fix loops, optional for read-only activity, and must stay outside the primary checkout. Worktrees are local execution sandboxes only and do not change PR, CI, or human approval flow.",
+      "phase": "R",
+      "alternatives": [
+        "Reuse one mutable worktree across active tasks",
+        "Treat worktrees as alternate PR or merge units"
+      ],
+      "status": "accepted",
+      "id": "dec-1772807936678",
+      "decidedAt": "2026-03-06T14:38:56.678Z"
+    },
+    {
+      "title": "Telemetry is metadata-first and local-first",
+      "description": "Required observability covers scheduler health, backlog, retries, dead letters, merge blocks, CI ordering rejections, trusted-source violations, and tool policy rejections. Telemetry may carry audit-safe operational metadata, but raw conversations, secret-bearing payloads, and default prompt dumping remain forbidden.",
+      "phase": "R",
+      "alternatives": [
+        "Capture prompts and raw payloads by default for debugging",
+        "Treat telemetry as a replacement for audit_log or durable memory policy"
+      ],
+      "status": "accepted",
+      "id": "dec-1772807936682",
+      "decidedAt": "2026-03-06T14:38:56.682Z"
+    },
+    {
+      "title": "A2A is deferred and edge-bounded",
+      "description": "A2A is accepted only as a future external coordination boundary after MCP. It may not replace Redis Streams, call primary agents directly, create a second orchestration graph, or enter Epic 1 scope.",
+      "phase": "R",
+      "alternatives": [
+        "Implement A2A alongside MCP in Epic 1",
+        "Let A2A become an internal execution path"
+      ],
+      "status": "accepted",
+      "id": "dec-1772807936685",
+      "decidedAt": "2026-03-06T14:38:56.685Z"
+    },
+    {
+      "title": "Epic 1 MCP transport is stdio only",
+      "description": "Epic 1 implements a local-first stdio MCP server only. HTTP/SSE remains out of scope for this slice so the repository can ship a bounded edge adapter without introducing a second network surface or a larger deployment contract.",
+      "phase": "E",
+      "alternatives": [
+        "Implement HTTP/SSE in the same slice",
+        "Delay all MCP work until both transports are available"
+      ],
+      "status": "accepted",
+      "id": "dec-1772809576974",
+      "decidedAt": "2026-03-06T15:06:16.974Z"
+    },
+    {
+      "title": "Epic 1 exposes an allowlisted MCP tool surface only",
+      "description": "The scheduler adapter exposes health, graph state, task state, audit events, and a governed issue request path. The memory adapter exposes distilled-record reads and a governed memory_write_requested submission path with preflight validation. No direct task mutation, CI mutation, merge mutation, or arbitrary event publication is exposed.",
+      "phase": "E",
+      "alternatives": [
+        "Expose a generic event publishing tool",
+        "Expose broad task mutation tools and rely on downstream services to reject misuse"
+      ],
+      "status": "accepted",
+      "id": "dec-1772809577079",
+      "decidedAt": "2026-03-06T15:06:17.079Z"
+    }
+  ]
+}

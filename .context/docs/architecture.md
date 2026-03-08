@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Arquitetura
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md) e [`../../docs/architecture.md`](../../docs/architecture.md) como fontes canônicas.
+
 ## Visão Geral
 
 Este workspace utiliza uma arquitetura local-first e orientada a eventos para entrega de software assistida por IA.

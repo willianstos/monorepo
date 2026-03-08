@@ -1,5 +1,9 @@
 # Q&A Index
 
+Non-authoritative. Generated supporting context only.
+
+Canonical guidance lives in [`AGENTS.md`](../../../AGENTS.md), [`README.md`](../../../README.md), and [`docs/`](../../../docs/).
+
 Project type: **library**
 
 Generated: 2026-03-05T23:56:57.537Z

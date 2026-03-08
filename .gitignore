@@ -16,6 +16,7 @@ env/*.local
 .agent/catalogs/
 .agent/skills/*
 !.agent/skills/README.md
+!.agent/skills/tutor-orchestrator/
 *.egg-info/
 .coverage
 htmlcov/

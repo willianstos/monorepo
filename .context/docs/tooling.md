@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Guia de Ferramentas e Produtividade
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md), [`../../WORKSPACE.md`](../../WORKSPACE.md) e os arquivos-fonte do repositório como fontes canônicas.
+
 ## Ferramentas Python
 
 Toda a configuração de ferramentas está em `pyproject.toml`.

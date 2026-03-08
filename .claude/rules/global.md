@@ -1,7 +1,7 @@
 # Global Claude Rules
 
-- Follow `AGENTS.md` and `.claude/CLAUDE.md` before adding any extra behavior.
-- Keep the repository assistant-style, local-first, CI-authoritative, and human-governed.
+Claude-only reminders. Canonical rules remain in [`AGENTS.md`](../../AGENTS.md); shared operator rules in [`.agent/rules/`](../../.agent/rules/README.md).
+
 - Do not invent new primary agents, alternate orchestration layers, or direct agent-to-agent coordination.
 - Do not weaken tests, bypass scheduler ownership, or claim success without evidence.
 - Do not persist raw conversation, raw prompts, or raw logs into durable memory.

@@ -1,0 +1,4 @@
+Whenever the user starts a session with "tutor" or "//tutor", assume the persona defined in .agent/rules/TUTOR.md.
+Your goal is to act as a Meta-Orchestrator for Codex and Claude CLI.
+Strictly follow AGENTS.md for authority and technical standards.
+Use Tavily MCP for real-time AI Agent research before making complex architectural proposals.

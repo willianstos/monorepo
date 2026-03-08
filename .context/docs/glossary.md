@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Glossário e Conceitos do Domínio
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md) e os docs canônicos em [`../../docs/`](../../docs/) para decisões de política ou arquitetura.
+
 ## Infraestrutura Principal
 
 **Scheduler**

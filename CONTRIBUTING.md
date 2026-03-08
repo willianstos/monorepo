@@ -1,64 +1,80 @@
 # Contributing
 
-> Last Updated: 06/03/2026
-
-This repository is a Python blueprint for a local-first AI coding assistant workspace. Most changes will touch architecture contracts, scheduler rules, provider routing, tool policy, or supporting documentation rather than a fully wired production runtime.
+Setup, validation, and change boundaries for the Future Agents workspace. Most changes touch architecture contracts, scheduler rules, provider routing, tool policy, or documentation rather than a fully wired production runtime.
 
 ## Setup
 
 1. Create and activate a Python 3.11+ virtual environment.
-2. Install the package and development tooling with `.context/.venv/bin/python -m pip install -e .[dev]` or the equivalent active-venv `python -m pip install -e .[dev]`.
-3. Keep generated notes, scaffolds, and run artefacts inside `.context/`.
+2. Install: `python -m pip install -e .[dev]`
+3. Keep generated artifacts inside `.context/`.
 
-## Common Commands
+## Validation Commands
 
-- `.context/.venv/bin/python -m pytest`
-- `.context/.venv/bin/python -m pytest -k <pattern>`
-- `.context/.venv/bin/python -m pytest workspace/scheduler/test_orchestration.py -q`
-- `REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 .context/.venv/bin/python -m pytest workspace/scheduler/test_redis_integration.py -q`
-- `.context/.venv/bin/python -m ruff check workspace projects`
-- `.context/.venv/bin/python -m mypy workspace`
-- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py snapshot`
-- `REDIS_PORT=6380 REDIS_DB=15 .context/.venv/bin/python bootstrap/local_validation.py controlled-flow --reset-db --graph-id rc-local-001 --objective "RC validation" --project-name 01-monolito`
-- `bash bootstrap/git-cycle.sh "06/03/2026" "nome-randomico"`
+```bash
+# Unit tests
+python -m pytest
+
+# Specific pattern
+python -m pytest -k <pattern>
+
+# Lint
+python -m ruff check workspace projects
+
+# Type check
+python -m mypy workspace
+
+# Redis integration (start Redis first)
+docker compose -f docker-compose.redis.yml up -d redis-integration
+REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 python -m pytest workspace/scheduler/test_redis_integration.py -q
+
+# End-to-end controlled flow
+REDIS_PORT=6380 REDIS_DB=15 python bootstrap/local_validation.py controlled-flow \
+  --reset-db --graph-id rc-local-001 --objective "RC validation" --project-name 01-monolito
+
+# Git checkpoint (from WSL)
+bash bootstrap/git-cycle.sh "dd/mm/yyyy" "branch-slug"
+```
 
 ## Change Boundaries
 
-- Edit `.agent/` when curating local skills, vendored skill catalogs, workflow notes, or agent-local memory assets. Treat `.agent/catalogs/` as vendored third-party content unless the change is intentional.
-- Edit `workspace/` for Python source, contracts, and blueprint runtime behavior.
-- Edit `guardrails/` and `GUARDRAILS.md` together when policy changes.
-- Edit `docs/`, `README.md`, and `WORKSPACE.md` when architecture or operating rules change.
-- Edit `bootstrap/` for Windows/WSL bootstrap, healthcheck, and developer environment automation.
-- Edit `.context/` indexes when adding new reusable documentation or agent playbooks.
-- Edit `projects/` only for target-project seeds and project-specific notes.
-
-## Documentation Expectations
-
-- Keep top-level docs aligned with repository structure changes.
-- Keep repo-owned markdown docs on the current `Last Updated: 06/03/2026` format when they are touched.
-- Do not describe the repository as "placeholders only" when the scheduler/event-bus/runtime contracts are implemented.
-- Link new long-lived guidance from `.context/docs/README.md`.
-- Link new reusable agent instructions from `.context/agents/README.md`.
-- Include sample payloads or generated markdown when schemas or scaffolds change materially.
-
-## Validation Expectations
-
-- Run `python -m pytest` for any code change.
-- Start Redis with `docker compose -f docker-compose.redis.yml up -d redis-integration` before running `workspace/scheduler/test_redis_integration.py`.
-- If `127.0.0.1:6380` is unreliable, run `bootstrap/redis_diagnostics.py` and switch to `docker compose -f docker-compose.redis.yml up -d redis-hostnet`.
-- Run `python -m ruff check workspace projects` and `python -m mypy workspace` for structural Python changes.
-- If a change is documentation-only, state that validation was skipped or limited.
-- Before reporting completion, run `/git dd/mm/aaaa nome-randomico` or `bash bootstrap/git-cycle.sh "dd/mm/aaaa" "nome-randomico"` from WSL.
+| Area | Where to edit |
+|------|---------------|
+| Skills, catalogs, agent memory | `.agent/` |
+| Python source and contracts | `workspace/` |
+| Safety policy | `GUARDRAILS.md` + `guardrails/` together |
+| Docs, README, workspace map | `docs/`, `README.md`, `WORKSPACE.md` |
+| Bootstrap and developer environment | `bootstrap/` |
+| Generated state and evidence | `.context/` only |
+| Target project seeds | `projects/` |
 
 ## CI and PR Gate
 
-All changes to `main` must pass through a Gitea pull request. The PR validation pipeline runs automatically and includes:
+All changes to `main` pass through a Gitea pull request. The pipeline runs:
 
-- `Lint (ruff)` — `python -m ruff check workspace projects`
-- `Type Check (mypy)` — `python -m mypy workspace`
-- `Unit Tests (pytest)` — `python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q`
-- `Integration Tests (Redis)` — `python -m pytest workspace/scheduler/test_redis_integration.py -q`
+| Check | Command |
+|-------|---------|
+| Lint | `python -m ruff check workspace projects` |
+| Type check | `python -m mypy workspace` |
+| Unit tests | `python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q` |
+| Integration tests | `python -m pytest workspace/scheduler/test_redis_integration.py -q` |
 
-All four checks must pass. At least one human approval is required. No merge is permitted without CI + human approval.
+All four checks must pass. At least one human approval is required. No merge without CI + human approval.
 
-See [`docs/gitea-pr-validation.md`](./docs/gitea-pr-validation.md) for operator setup and branch protection configuration.
+See [`docs/gitea-pr-validation.md`](docs/gitea-pr-validation.md) for pipeline setup and branch protection.
+
+## Documentation Conventions
+
+- Keep top-level docs aligned with repository structure changes.
+- Use `Last Updated: dd/mm/yyyy` format when touching dated docs.
+- Put new canonical guidance in `docs/`, `README.md`, `WORKSPACE.md`, `AGENTS.md`, or `.agent/` per the frozen hierarchy.
+- Treat `.context/` indexes as generated lookup aids only.
+
+## Authority Freeze Checklist
+
+- [ ] No new competing instruction source was created.
+- [ ] Operational rules stay in `.agent/rules/`.
+- [ ] Workflow logic stays in `.agent/workflows/`.
+- [ ] Shared skills stay in `.agent/skills/`.
+- [ ] `.context/` was not turned into policy authority.
+- [ ] Any retained legacy file is explicitly non-authoritative and points to the canonical source.
+- [ ] Any hierarchy change is intentional and flagged for human review in the PR.

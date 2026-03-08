@@ -1,0 +1,42 @@
+project:
+  name: "future-agents-evolution-2026"
+  scale: LARGE
+  started: "2026-03-06T10:36:57.372Z"
+  current_phase: E
+
+phases:
+  P:
+    status: filled
+    started_at: "2026-03-06T10:36:57.372Z"
+    completed_at: "2026-03-06T10:42:08.784Z"
+  R:
+    status: filled
+    started_at: "2026-03-06T10:42:08.785Z"
+    completed_at: "2026-03-06T14:39:03.265Z"
+  E:
+    status: in_progress
+    started_at: "2026-03-06T14:39:03.266Z"
+  V:
+    status: pending
+  C:
+    status: pending
+
+execution:
+  history:
+    - timestamp: "2026-03-06T15:06:17.081Z"
+      phase: E
+      action: decision_recorded
+      plan: "future-agents-evolution-2026"
+      description: "Decision recorded: Epic 1 exposes an allowlisted MCP tool surface only"
+  last_activity: "2026-03-06T15:06:17.081Z"
+  resume_context: "Decisão registrada"
+
+settings:
+  autonomous_mode: true
+  require_plan: true
+  require_approval: true
+
+approval:
+  plan_created: true
+  plan_approved: false
+
