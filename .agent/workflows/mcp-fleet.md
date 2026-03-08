@@ -21,6 +21,8 @@ Aplica e verifica o inventário canônico definido em [`bootstrap/mcp-registry.t
 
 Governança complementar: [`docs/windows11-wsl2-mcp-governance.md`](../../docs/windows11-wsl2-mcp-governance.md).
 
+Escopo explícito: `/mcp-fleet` governa apenas inventário e convergência de servidores MCP. Autenticação de GitHub para `git fetch/push` do espelho não é resolvida por MCP e permanece no fluxo de Git com `gh` + credential helper. Ver [`../../docs/guide_git.md`](../../docs/guide_git.md) e [`../../bootstrap/github-mirror-auth.sh`](../../bootstrap/github-mirror-auth.sh).
+
 ## Inventário canônico (P1 — ativos)
 
 Versões pinadas são obrigatórias para dependências externas. Servidores MCP locais do repositório devem usar `bash`/`wsl.exe`, `cd` explícito para a raiz do repo e launchers determinísticos em `bootstrap/`.
@@ -54,6 +56,7 @@ Versões pinadas são obrigatórias para dependências externas. Servidores MCP 
 
 - Para alterar a lógica interna de um servidor MCP (apenas configuração de cliente).
 - Quando uma superfície diverge por decisão arquitetural explícita e documentada.
+- Para corrigir `git push`/`git fetch` com `403` no espelho GitHub. Isso é autenticação Git/HTTPS, não convergência MCP.
 
 ## Comando
 
@@ -87,6 +90,7 @@ Versões pinadas são obrigatórias para dependências externas. Servidores MCP 
 ## Guardrails
 
 - **Versões pinadas são obrigatórias** para todos os pacotes com distribuição npm/PyPI estável.
+- O GitHub MCP Server oficial, mesmo quando instalado, não substitui `gh auth setup-git` nem corrige transporte Git HTTPS. MCP expõe APIs e contexto para hosts compatíveis; o espelho Git continua usando remotes e credential helper.
 - Servidores MCP locais do repositório devem sempre iniciar com `bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-..."`.
 - `future-agents-local` deve ter `startup_timeout_sec = 120`; `docker` e `redis`, `40`.
 - Evitar edição direta de `~/.codex/config.toml` e `C:\Users\Zappro\.codex\config.toml`; usar o renderer e os scripts de governança.

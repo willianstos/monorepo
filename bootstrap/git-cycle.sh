@@ -131,6 +131,32 @@ run_cmd() {
   "$@" 2>&1 | tee -a "$audit_log"
 }
 
+ensure_github_mirror_auth() {
+  local helper_script
+
+  if [ "$github_url" = "not-configured" ]; then
+    return 0
+  fi
+
+  helper_script="$repo_root/bootstrap/github-mirror-auth.sh"
+  if [ ! -f "$helper_script" ]; then
+    log_note "Warning: github mirror auth helper not found at $helper_script"
+    return 0
+  fi
+
+  log_note "\$ bash $helper_script ensure --quiet"
+  if [ "$dry_run" = true ]; then
+    log_note "dry-run: skipped"
+    return 0
+  fi
+
+  if bash "$helper_script" ensure --quiet >>"$audit_log" 2>&1; then
+    log_note "github mirror auth ready"
+  else
+    log_note "Warning: github mirror auth not ready; mirror sync may fail"
+  fi
+}
+
 write_summary() {
   local status_label="$1"
   {
@@ -383,6 +409,7 @@ fi
 
 run_cmd git fetch origin --prune || log_note "Warning: failed to fetch from origin"
 if [ "$github_url" != "not-configured" ]; then
+  ensure_github_mirror_auth
   run_cmd git fetch github --prune || log_note "Warning: failed to fetch from github"
 fi
 

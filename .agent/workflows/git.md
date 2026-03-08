@@ -46,9 +46,16 @@ If mutable work needs isolation first:
 bash bootstrap/git-worktree.sh create "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
+One-time GitHub mirror bootstrap for this WSL profile:
+
+```bash
+bash bootstrap/github-mirror-auth.sh ensure
+```
+
 Default behavior:
 
 - creates a checkpoint commit only if the feature branch is dirty
+- ensures GitHub CLI auth and git credential helper once when the `github` remote exists
 - pushes the active feature branch to local Gitea (`origin`) and then attempts to sync the GitHub mirror (`github`)
 - records the run under `.context/runs/git/`
 - does not merge into `main`

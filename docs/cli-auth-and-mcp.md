@@ -9,6 +9,13 @@ Operator notes for tool authentication and MCP server configuration. Model autho
 - Prefer shared skills under `.agent/` over deprecated custom prompt patterns.
 - Manage MCP servers with `codex mcp`. For the local Epic 1 server, see [Operator MCP Local Usage](./operator/mcp-local-usage.md).
 
+## GitHub Mirror Auth
+
+- GitHub mirror authentication for `git fetch/push` is owned by Git + GitHub CLI, not by MCP.
+- Run `bash bootstrap/github-mirror-auth.sh ensure` once per WSL profile after setting `GITHUB_TOKEN` in `env/.env`.
+- Validate with `bash bootstrap/github-mirror-auth.sh check`.
+- If `check` fails with `git push --dry-run`, the token is authenticated but still not usable for mirror writes.
+
 ## Claude
 
 - Project layer: `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/`, `.claude/memory/`.
@@ -22,3 +29,5 @@ Operator notes for tool authentication and MCP server configuration. Model autho
 ## MCP Boundary
 
 MCP is an edge adapter. It exposes bounded read-only scheduler and memory tools. It does not create a second control plane, bypass CI gates, or grant merge authority. See [`docs/contracts/mcp-boundary.md`](./contracts/mcp-boundary.md) for the full contract.
+
+Installing the official GitHub MCP Server can add GitHub API tools to MCP-capable clients, but it does not replace Git remote authentication or fix HTTPS push failures on the `github` remote.
