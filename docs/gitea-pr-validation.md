@@ -2,7 +2,7 @@
 
 Operator guide for the Gitea-based PR validation gate. Git and merge policy comes from [`AGENTS.md`](../AGENTS.md) and [`guide_git.md`](./guide_git.md). This document explains how Gitea Actions, `act_runner`, and branch protection enforce that policy.
 
-Local Gitea is the authoritative host for PR review, CI, and merge. GitHub is mirror-only. This document covers the PR gate on the authoritative host; it does not redefine the broader Git workflow.
+Local Gitea is the authoritative host for PR review, CI, and merge. The repository may be public-readable on the local host without changing that authority. GitHub is mirror-only. This document covers the PR gate on the authoritative host; it does not redefine the broader Git workflow.
 
 ## Gate
 
@@ -11,6 +11,8 @@ feature branch  ->  PR to main  ->  CI green  ->  human approval  ->  merge
 ```
 
 No merge without both passing CI and explicit human approval.
+
+Public visibility on local Gitea does not create a second governance path. Protected branch settings, Actions, approvals, and merge authority stay in Gitea.
 
 ## 1. Enable Gitea Actions
 

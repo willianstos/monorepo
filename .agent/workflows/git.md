@@ -20,7 +20,7 @@ A WSL-first checkpoint and sync workflow for feature branches. It records branch
 ## When to use
 
 - To save progress on a feature branch.
-- To push changes to local Gitea (`origin`) and the GitHub mirror (`github`) as configured by `bootstrap/git-cycle.sh`.
+- To push changes to local Gitea (`origin`) and sync the GitHub mirror (`github`) when configured by `bootstrap/git-cycle.sh`.
 - To leave completion evidence for branch work.
 
 ## When NOT to use
@@ -49,7 +49,7 @@ bash bootstrap/git-worktree.sh create "<dd/mm/aaaa>" "<branch-slug>"
 Default behavior:
 
 - creates a checkpoint commit only if the feature branch is dirty
-- pushes the active feature branch to local Gitea (`origin`) and the GitHub mirror (`github`)
+- pushes the active feature branch to local Gitea (`origin`) and then attempts to sync the GitHub mirror (`github`)
 - records the run under `.context/runs/git/`
 - does not merge into `main`
 
@@ -83,12 +83,13 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 2. **Scope check**: on `--merge-main`, requires one of:
    - explicit path scope via `--scope` (recommended), or
    - `--allow-wide-merge` with explicit human approval.
-3. **Sync**: pushes the active branch to Gitea and the GitHub mirror.
+3. **Sync**: pushes the active branch to Gitea and then attempts GitHub mirror sync when configured.
 4. **Record**: logs execution details in `.context/runs/git/`.
 
 ## Outputs
 
-- Active branch pushed to `origin` and `github`.
+- Active branch pushed to `origin`.
+- GitHub mirror sync attempted when `github` is configured.
 - Run metadata in `.context/runs/git/`.
 
 ## Guardrails
@@ -96,6 +97,7 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 - **WSL-only**: run from WSL.
 - **Worktree-first for concurrent mutable work**: if another mutable task may run in parallel, create a dedicated worktree before `/git`.
 - **No default merge**: `/git` does not imply merge to `main`.
+- **Gitea stays authoritative**: GitHub mirror sync is secondary and does not replace the Gitea PR, CI, or merge gate.
 - **PR path remains mandatory**: use Gitea PR review plus CI and human approval before merging to `main`.
 - **Merge scope guard**: `--merge-main` requires explicit scope by default (`--scope`), except `--allow-wide-merge` for approved cross-cutting changes.
 - **Scope of change**: `--merge-main` now refuses to run on a dirty branch; checkpoint first with `/git` plain mode.

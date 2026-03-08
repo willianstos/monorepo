@@ -31,6 +31,8 @@ Local-first AI coding assistant workspace for controlled software delivery. Assi
 - DAG state: persisted in Redis.
 - Agent communication: events only. No direct agent-to-agent calls.
 - CI: authoritative.
+- Code host authority: local Gitea for pull requests, CI, and merge.
+- GitHub: public mirror only. Mirror sync does not change merge authority.
 - Merge to `main`: requires human approval after CI passes.
 - Local-first routing: preserved.
 - Raw conversation logs: never enter durable memory.

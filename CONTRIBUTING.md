@@ -64,6 +64,8 @@ bash bootstrap/git-worktree.sh create "dd/mm/yyyy" "branch-slug"
 
 All changes to `main` pass through a Gitea pull request. The pipeline runs:
 
+The local Gitea repository may be public-readable. That visibility is distribution-only and does not move authority. GitHub remains a mirror and does not own PR, CI, or merge decisions for this repository.
+
 | Check | Command |
 |-------|---------|
 | Lint | `python -m ruff check workspace projects` |

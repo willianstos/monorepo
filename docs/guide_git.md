@@ -15,7 +15,8 @@ Cadeia canônica de Git:
 ## Autoridade
 
 - **Gitea** é o host autoritativo para PR, CI e merge.
-- **GitHub** é espelho somente.
+- O repositório na **Gitea** pode ficar público para leitura local sem mudar essa autoridade.
+- **GitHub** é espelho somente para distribuição e backup; não governa PR, CI ou merge.
 - `main` é a branch protegida e canônica.
 - `git worktree` é o sandbox mutável padrão quando houver concorrência.
 
@@ -59,7 +60,7 @@ bash bootstrap/git-worktree.sh list
 ## O Que `/git` Faz
 
 - Cria checkpoint da branch quando houver mudanças pendentes.
-- Envia a branch ativa para `origin` e `github`.
+- Envia a branch ativa para `origin` e tenta sincronizar o espelho `github` quando ele estiver configurado.
 - Registra a execução em `.context/runs/git/`.
 - Não cria worktree; isso é responsabilidade do helper `bootstrap/git-worktree.sh`.
 
@@ -85,5 +86,5 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 
 - O trabalho de branch termina com `/git`; a integração em `main` termina com PR.
 - O trabalho mutável concorrente começa em `worktree`; o fechamento continua em `/git` e PR.
-- Gitea governa merge; GitHub apenas espelha.
+- Gitea governa merge, PR e CI mesmo quando o repositório estiver público; GitHub apenas espelha.
 - Nada entra em `main` sem PR, CI verde e aprovação humana.
