@@ -16,6 +16,8 @@ Operator notes for tool authentication and MCP server configuration. Model autho
 - Inside Claude Code: `/mcp` for MCP connections, `/memory` for memory handling.
 - Keep terminal, IDE, and desktop sessions aligned with the same checked-in instructions.
 - The repository MCP server is stdio-only in Epic 1. See [Operator MCP Local Usage](./operator/mcp-local-usage.md).
+- Add home lab MCP servers with `claude mcp add <name> -s user -- <command> [args]` (user scope is shared across all projects and the AntiGravity IDE).
+- Full home lab MCP inventory: [`docs/mcp-homelab-servers.md`](./mcp-homelab-servers.md).
 
 ## MCP Boundary
 

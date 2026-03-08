@@ -9,9 +9,12 @@ Execution playbooks. Not the repository contract.
 | `/git` | Checkpoint and sync the active feature branch | [`git.md`](./git.md) |
 | `/pr` | Handoff into the mandatory Gitea PR gate | [`pr.md`](./pr.md) |
 | `/validate` | Local validation path | [`validate.md`](./validate.md) |
+| `/mcp-fleet` | Converge MCP server config (11 servers, pinned versions) across Claude Code CLI, Codex WSL, Codex Windows, and Claude Desktop | [`mcp-fleet.md`](./mcp-fleet.md) |
 | `/super-review` | Deep local pre-deploy audit for security, quality, performance, and architecture | [`super-review.md`](./super-review.md) |
 | `/release-note` | Change-summary generation | [`release-note.md`](./release-note.md) |
 | `/workflow-map` | Explain an existing workflow | [`workflow-map.md`](./workflow-map.md) |
+| `/tutor` | Activate the Antigravity Tutor Persona | [`tutor.md`](./tutor.md) |
+| `/compact` | Summarize and persist session state for memory saving | [`compact.md`](./compact.md) |
 
 ## Conventions
 
