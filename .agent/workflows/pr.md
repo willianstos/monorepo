@@ -1,6 +1,6 @@
 # /pr
 ---
-description: Prepare the branch for the mandatory Gitea PR path.
+description: Prepare the branch for the mandatory Gitea master PR path.
 trigger: /pr
 args: ""
 runner: any
@@ -30,7 +30,7 @@ A short execution reminder for the canonical PR handoff.
 ## Flow
 
 1. **Validate**: run `/validate` when local validation is needed.
-2. **Checkpoint**: run `/git` to sync the feature branch.
+2. **Checkpoint**: run `/git` to sync the feature branch to `origin` first and the GitHub mirror second.
 3. **Open PR**: create the PR in Gitea against `main`.
 4. **Wait for gates**: require green CI and human approval before merge.
 
@@ -39,10 +39,11 @@ A short execution reminder for the canonical PR handoff.
 - Follow [`../../docs/guide_git.md`](../../docs/guide_git.md) for the Git policy chain.
 - Use [`../../docs/gitea-pr-validation.md`](../../docs/gitea-pr-validation.md) for branch-protection and Gitea Actions details.
 - Repository-wide delivery constraints remain in [`../../AGENTS.md`](../../AGENTS.md).
+- The PR authority is always Gitea. GitHub mirror state never replaces or unblocks the Gitea gate.
 
 ## Mental model
 
-The PR is the gated path into `main`; `/git` only gets the branch there.
+The PR is the gated path into `main`; `/git` only gets the branch to the master remote first and mirrors second.
 
 ## Never forget
 

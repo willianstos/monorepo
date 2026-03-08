@@ -71,7 +71,7 @@ REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 python -m pytest workspace/s
 
 ## Mental model
 
-`/validate` is the local gate before the remote gate.
+`/validate` is the local gate before `/git`, before the Gitea master gate, and before any best-effort GitHub mirror sync.
 
 ## Never forget
 

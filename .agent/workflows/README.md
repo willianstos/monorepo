@@ -6,8 +6,8 @@ Execution playbooks. Not the repository contract.
 
 | Command | Purpose | File |
 |---------|---------|------|
-| `/git` | Checkpoint and sync the active feature branch | [`git.md`](./git.md) |
-| `/pr` | Handoff into the mandatory Gitea PR gate | [`pr.md`](./pr.md) |
+| `/git` | Checkpoint and sync the active feature branch to `origin` first, then the `github` mirror | [`git.md`](./git.md) |
+| `/pr` | Handoff into the mandatory Gitea master PR gate | [`pr.md`](./pr.md) |
 | `/validate` | Local validation path | [`validate.md`](./validate.md) |
 | `/mcp-fleet` | Converge MCP server config (11 servers, pinned versions) across Claude Code CLI, Codex WSL, Codex Windows, and Claude Desktop | [`mcp-fleet.md`](./mcp-fleet.md) |
 | `/super-review` | Deep local pre-deploy audit for security, quality, performance, and architecture | [`super-review.md`](./super-review.md) |
@@ -21,5 +21,6 @@ Execution playbooks. Not the repository contract.
 - Keep workflows thin, explicit, and operational.
 - Prefer repository scripts for executable logic.
 - Do not embed repository policy in workflow files.
+- In Git-host terms, treat `origin`/Gitea as the master authoritative remote and `github` as subordinate mirror-only.
 - Keep the workflow index synchronized with every checked-in file in this directory.
 - Store workflow state and run history in `.context/workflow/` and `.context/runs/`.
