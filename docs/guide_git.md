@@ -49,7 +49,8 @@ bash bootstrap/git-worktree.sh list
 
 1. Atualize a `main` local e crie a branch de trabalho.
    - Se houver chance de concorrência mutável, crie primeiro um worktree dedicado.
-   - Se o espelho GitHub ainda não foi registrado nesta instalação WSL, rode `bash bootstrap/github-mirror-auth.sh ensure` uma vez.
+   - Se o espelho GitHub ainda não foi registrado nesta instalação WSL, rode `bash bootstrap/github-mirror-auth.sh ensure` uma vez. O helper tenta HTTPS com `gh` e, se necessário, provisiona `pushurl` SSH com deploy key do repositório.
+   - O fallback SSH usa alias fixo `github-mirror-<owner>-<repo>` e título fixo `wsl-github-mirror-<owner>-<repo>`.
 2. Trabalhe e faça commits locais normais.
 3. Rode `/validate` quando a mudança exigir validação local.
 4. Rode `/git <dd/mm/aaaa> <branch-slug>` a partir do WSL para checkpoint, sincronização e evidência.
@@ -61,11 +62,12 @@ bash bootstrap/git-worktree.sh list
 ## O Que `/git` Faz
 
 - Cria checkpoint da branch quando houver mudanças pendentes.
-- Garante o bootstrap do espelho GitHub via `gh auth` quando o remote `github` estiver configurado.
+- Garante o bootstrap do espelho GitHub quando o remote `github` estiver configurado.
 - Envia a branch ativa para `origin` e tenta sincronizar o espelho `github` quando ele estiver configurado.
 - Registra a execução em `.context/runs/git/`.
 - Não cria worktree; isso é responsabilidade do helper `bootstrap/git-worktree.sh`.
 - O bootstrap do espelho considera válido apenas o que passa em `git push --dry-run` no remote `github`.
+- Se o fallback SSH não ficar saudável, o helper restaura o `pushurl` anterior do remote `github`.
 
 Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.md).
 
@@ -74,7 +76,7 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 - Não abre PR.
 - Não substitui revisão, CI ou aprovação humana.
 - Não autoriza push direto para `main`.
-- Não corrige token GitHub sem escopo de escrita; nesse caso o espelho falha e a autoridade continua na Gitea.
+- Não transforma GitHub em host autoritativo; mesmo com deploy key SSH funcional, a autoridade continua na Gitea.
 - Não transforma `--merge-main` em bypass de proteção.
 - `--merge-main` sem `--scope` é bloqueado; use `--allow-wide-merge` apenas para casos aprovados de mudança transversal.
 - Não elimina a necessidade de isolamento por `worktree` quando houver mutação paralela.

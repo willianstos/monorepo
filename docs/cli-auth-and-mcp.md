@@ -14,7 +14,9 @@ Operator notes for tool authentication and MCP server configuration. Model autho
 - GitHub mirror authentication for `git fetch/push` is owned by Git + GitHub CLI, not by MCP.
 - Run `bash bootstrap/github-mirror-auth.sh ensure` once per WSL profile after setting `GITHUB_TOKEN` in `env/.env`.
 - Validate with `bash bootstrap/github-mirror-auth.sh check`.
-- If `check` fails with `git push --dry-run`, the token is authenticated but still not usable for mirror writes.
+- If HTTPS push is denied but the token has repo admin on the mirror, the helper provisions a repo-scoped SSH deploy key and rewrites only `remote.github.pushurl`.
+- The SSH fallback stays pinned to `github-mirror-<owner>-<repo>` in `~/.ssh/config.d/` and to deploy key title `wsl-github-mirror-<owner>-<repo>`.
+- If `check` still fails with `git push --dry-run`, the mirror remains non-writable from this WSL profile.
 
 ## Claude
 

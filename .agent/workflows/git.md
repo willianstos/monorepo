@@ -55,7 +55,8 @@ bash bootstrap/github-mirror-auth.sh ensure
 Default behavior:
 
 - creates a checkpoint commit only if the feature branch is dirty
-- ensures GitHub CLI auth and git credential helper once when the `github` remote exists
+- ensures mirror bootstrap once when the `github` remote exists, using HTTPS via `gh` first and repo-scoped SSH deploy key fallback if needed
+- uses pinned SSH alias and deploy key naming derived from the repo slug when SSH fallback is needed
 - pushes the active feature branch to local Gitea (`origin`) and then attempts to sync the GitHub mirror (`github`)
 - records the run under `.context/runs/git/`
 - does not merge into `main`
