@@ -33,6 +33,7 @@ A short execution reminder for the canonical PR handoff.
 2. **Checkpoint**: run `/git` to sync the feature branch to `origin` first and the GitHub mirror second.
 3. **Open PR**: create the PR in Gitea against `main`.
 4. **Wait for gates**: require green CI and human approval before merge.
+5. **Final check**: run `/merge-ready` before anyone clicks merge on Gitea.
 
 ## Guardrails
 

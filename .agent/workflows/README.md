@@ -8,6 +8,8 @@ Execution playbooks. Not the repository contract.
 |---------|---------|------|
 | `/git` | Checkpoint and sync the active feature branch to `origin` first, then the `github` mirror | [`git.md`](./git.md) |
 | `/pr` | Handoff into the mandatory Gitea master PR gate | [`pr.md`](./pr.md) |
+| `/merge-ready` | Final pre-merge checklist for the Gitea master gate | [`merge-ready.md`](./merge-ready.md) |
+| `/post-merge` | Restore local baseline after a merge already happened on Gitea | [`post-merge.md`](./post-merge.md) |
 | `/validate` | Local validation path | [`validate.md`](./validate.md) |
 | `/mcp-fleet` | Converge MCP server config (11 servers, pinned versions) across Claude Code CLI, Codex WSL, Codex Windows, and Claude Desktop | [`mcp-fleet.md`](./mcp-fleet.md) |
 | `/super-review` | Deep local pre-deploy audit for security, quality, performance, and architecture | [`super-review.md`](./super-review.md) |

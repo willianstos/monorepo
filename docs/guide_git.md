@@ -57,7 +57,9 @@ bash bootstrap/git-worktree.sh list
 4. Rode `/git <dd/mm/aaaa> <branch-slug>` a partir do WSL para checkpoint, sincronização e evidência.
 5. Abra o PR na Gitea contra `main`.
 6. Aguarde CI verde e aprovação humana.
-7. Faça o merge somente pela rota protegida da Gitea.
+7. Rode `/merge-ready` como checklist final antes do clique de merge.
+8. Faça o merge somente pela rota protegida da Gitea.
+9. Rode `/post-merge <branch-name>` para restaurar baseline local, limpar branch e sincronizar o espelho subordinado.
    - Se precisar antecipar merge em branch de trabalho para revisão formal, use `/git --merge-main --scope ...`.
 
 ## O Que `/git` Faz

@@ -33,6 +33,8 @@ How the execution layer and state layer are separated. Does not replace root aut
 |---------|---------|
 | `/git` | Close branch work, leave evidence |
 | `/pr` | Hand branch into the Gitea PR gate |
+| `/merge-ready` | Final merge-readiness checklist before using the Gitea gate |
+| `/post-merge` | Restore local baseline after the authoritative merge |
 | `/validate` | Local validation before the remote gate |
 | `/super-review` | Run the deepest local audit before deploy or a high-risk PR |
 | `/release-note` | Generate a reviewer-facing or operator-facing change summary |

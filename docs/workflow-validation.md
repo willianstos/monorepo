@@ -4,7 +4,7 @@ Guia humano de validação da camada de workflows em [`.agent/workflows/`](../.a
 
 ## O Que Validar
 
-- Estrutura e consistência de `/git`, `/pr`, `/validate`, `/super-review`, `/release-note` e `/workflow-map`.
+- Estrutura e consistência de `/git`, `/pr`, `/merge-ready`, `/post-merge`, `/validate`, `/super-review`, `/release-note` e `/workflow-map`.
 - Alinhamento entre texto dos workflows e os comandos/documentos referenciados.
 - Ausência de contradição com `AGENTS.md`, `GUARDRAILS.md` e `docs/*`.
 
@@ -21,6 +21,8 @@ python -m pytest workspace/tests/
 | `/git` | Simulação executável via `--dry-run` |
 | `/validate` | Consistência de comandos e contrato |
 | `/pr` | Consistência de referências e gate |
+| `/merge-ready` | Checklist final e ausência de bypass local |
+| `/post-merge` | Limpeza pós-merge e precedência correta de remoto |
 | `/super-review` | Guardrails, escopo de auditoria e não substituição do CI remoto |
 | `/release-note` | Contrato e guardrails |
 | `/workflow-map` | Contrato e ausência de contradição |
