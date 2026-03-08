@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, BinaryIO
+
 
 from .adapters import MemoryMCPAdapter, SchedulerMCPAdapter, tool_result
 
@@ -74,28 +76,90 @@ class FutureAgentsMCPServer:
 
         raise MCPRequestError(-32601, f"Method '{method}' not found.")
 
-    def serve_stdio(self) -> int:
-        for raw_line in sys.stdin:
-            line = raw_line.strip()
-            if not line:
+    def serve_stdio(self, input_stream: BinaryIO | None = None, output_stream: BinaryIO | None = None) -> int:
+        input_stream = input_stream or sys.stdin.buffer
+        output_stream = output_stream or sys.stdout.buffer
+
+        while True:
+            try:
+                message = self._read_message(input_stream)
+            except EOFError:
+                break
+            except Exception as exc:  # noqa: BLE001
+                logging.debug("stdio read failed: %s", exc)
+                self._write_response(output_stream, self._error(None, -32700, "Parse error."))
                 continue
+
+            if message is None:
+                break
 
             try:
-                message = json.loads(line)
                 response = self.handle_message(message)
-            except json.JSONDecodeError:
-                response = self._error(None, -32700, "Parse error.")
             except MCPRequestError as exc:
-                response = self._error(self._extract_id(line), exc.code, exc.message)
+                response = self._error(message.get("id"), exc.code, exc.message)
             except Exception as exc:  # noqa: BLE001
-                response = self._error(self._extract_id(line), -32603, f"Internal error: {exc}")
+                response = self._error(message.get("id"), -32603, f"Internal error: {exc}")
 
-            if response is None:
-                continue
-            sys.stdout.write(json.dumps(response, sort_keys=True) + "\n")
-            sys.stdout.flush()
+            if response is not None:
+                self._write_response(output_stream, response)
 
         return 0
+
+    @staticmethod
+    def _read_headers(input_stream: BinaryIO) -> dict[str, str]:
+        headers: dict[str, str] = {}
+
+        while True:
+            line = input_stream.readline()
+            if line == b"":
+                raise EOFError
+
+            if line in (b"\r\n", b"\n"):
+                return headers
+
+            if not line.endswith((b"\n",)):
+                raise ValueError("Invalid MCP frame: incomplete header line.")
+
+            text = line.decode("utf-8").strip()
+            if not text:
+                return headers
+
+            name, sep, value = text.partition(":")
+            if not sep:
+                raise ValueError("Invalid MCP frame header: missing separator.")
+
+            headers[name.strip().lower()] = value.strip()
+
+    @staticmethod
+    def _read_message(input_stream: BinaryIO) -> dict[str, Any] | None:
+        headers = FutureAgentsMCPServer._read_headers(input_stream)
+        if "content-length" not in headers:
+            raise ValueError("Invalid MCP frame: missing Content-Length header.")
+
+        try:
+            content_length = int(headers["content-length"])
+        except ValueError as exc:
+            raise ValueError("Invalid MCP frame: invalid Content-Length.") from exc
+
+        if content_length < 0:
+            raise ValueError("Invalid MCP frame: negative Content-Length.")
+
+        payload = input_stream.read(content_length)
+        if len(payload) < content_length:
+            raise ValueError("Invalid MCP frame: incomplete body.")
+
+        try:
+            return json.loads(payload.decode("utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError("Invalid MCP frame: invalid JSON.") from exc
+
+    @staticmethod
+    def _write_response(output_stream: BinaryIO, response: dict[str, Any]) -> None:
+        payload = json.dumps(response, sort_keys=True).encode("utf-8")
+        header = f"Content-Length: {len(payload)}\r\n\r\n"
+        output_stream.write(header.encode("utf-8"))
+        output_stream.write(payload)
+        output_stream.flush()
 
     def _call_tool(self, *, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         try:
@@ -123,15 +187,6 @@ class FutureAgentsMCPServer:
             "id": request_id,
             "error": {"code": code, "message": message},
         }
-
-    @staticmethod
-    def _extract_id(raw_line: str) -> Any:
-        try:
-            payload = json.loads(raw_line)
-        except json.JSONDecodeError:
-            return None
-        return payload.get("id")
-
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Future Agents local-first MCP server.")
