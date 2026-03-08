@@ -19,13 +19,15 @@ Aplica e verifica o inventário canônico definido em [`docs/mcp-homelab-servers
 | Codex Windows | `C:\Users\Zappro\.codex\config.toml` |
 | Claude Desktop (Windows) | `AppData\Roaming\Claude\claude_desktop_config.json` |
 
+Governança complementar: [`docs/windows11-wsl2-mcp-governance.md`](../../docs/windows11-wsl2-mcp-governance.md).
+
 ## Inventário canônico (P1 — ativos)
 
-Versões pinadas são obrigatórias. `@modelcontextprotocol/server-docker` não tem distribuição npm pública — sem pin intencional.
+Versões pinadas são obrigatórias para dependências externas. Servidores MCP locais do repositório devem usar `bash`/`wsl.exe`, `cd` explícito para a raiz do repo e launchers determinísticos em `bootstrap/`.
 
 | Server | Pacote@versão | Claude Code CLI | Codex WSL | Codex Win | Claude Desktop |
 |--------|--------------|:---------------:|:---------:|:---------:|:--------------:|
-| `docker` | `@modelcontextprotocol/server-docker` (sem pin) | ✓ | ✓ | ✓ | ✓ |
+| `docker` | `workspace.mcp.docker_server` (stdio) | ✓ | ✓ | ✓ `wsl.exe` | ✓ `wsl.exe` |
 | `git` | `@cyanheads/git-mcp-server@2.10.0` | ✓ | ✓ | ✓ | ✓ |
 | `fetch` | `mcp-server-fetch==2025.4.7` (uvx) / `npx` (Win) | ✓ | ✓ | ✓ | ✓ |
 | `redis` | `@modelcontextprotocol/server-redis@2025.4.25` | ✓ | ✓ | ✓ | ✓ |
@@ -35,9 +37,11 @@ Versões pinadas são obrigatórias. `@modelcontextprotocol/server-docker` não 
 | `TestSprite` | `@testsprite/testsprite-mcp@0.0.30` | ✓ | ✓ | ✓ | ✓ |
 | `chrome-devtools` | `chrome-devtools-mcp@0.19.0` | ✓ | ✓ | ✓ | ✓ |
 | `ai-context` | `@ai-coders/context@0.7.1` | ✓ | ✓ | ✓ | ✓ |
-| `future-agents-local` | `workspace.mcp.server` (stdio) | ✓ | ✓ | ✓ | ✓ `wsl.exe` |
+| `future-agents-local` | `workspace.mcp.server` (stdio) | ✓ | ✓ | ✓ `wsl.exe` | ✓ `wsl.exe` |
 
-**Nota `future-agents-local` no Claude Desktop:** usa `wsl.exe -d Ubuntu-24.04 bash -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && python -m workspace.mcp.server --transport stdio"` — necessário pois o Desktop roda no Windows.
+**Nota `future-agents-local` no Claude Desktop:** usa `wsl.exe -d Ubuntu-24.04 bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-future-agents.sh"` — necessário pois o Desktop roda no Windows.
+
+**Nota `docker` nos clientes Windows:** usa `wsl.exe -d Ubuntu-24.04 bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-docker.sh"` para garantir acesso ao socket Docker do WSL e concentrar o launch em um wrapper versionado.
 
 ## Quando usar
 
@@ -65,8 +69,8 @@ Versões pinadas são obrigatórias. `@modelcontextprotocol/server-docker` não 
 1. **Leitura do inventário** — carregar tabela de `docs/mcp-homelab-servers.md` e `.agent/rules/MCP_SERVERS.md`.
 2. **Verificação por superfície** — para cada alvo no escopo, comparar servidores presentes e versões com o inventário.
 3. **Convergência** (se não `--dry-run`):
-   - Claude Code CLI: `claude mcp remove <name> -s user` + `claude mcp add <name> -s user -- <cmd@versão> [args]`
-   - Codex WSL / Windows: editar `config.toml` atualizando seções `[mcp_servers.*]`.
+   - Claude Code CLI: `claude mcp remove <name> -s user` + `claude mcp add <name> -s user -- <cmd> [args]`
+   - Codex WSL / Windows: atualizar os templates canônicos em `bootstrap/templates/` e reaplicar com `bootstrap/codex-governance-wsl.sh` ou `bootstrap/codex-governance.ps1`; no Windows, alinhar também `config.json` legado se ele existir.
    - Claude Desktop: editar `claude_desktop_config.json` atualizando entradas em `mcpServers`.
    - Preservar campos não conhecidos em todos os arquivos.
 4. **Resumo de estado**:
@@ -80,6 +84,9 @@ Versões pinadas são obrigatórias. `@modelcontextprotocol/server-docker` não 
 ## Guardrails
 
 - **Versões pinadas são obrigatórias** para todos os pacotes com distribuição npm/PyPI estável.
+- Servidores MCP locais do repositório devem sempre iniciar com `bash --noprofile --norc -lc "cd /mnt/c/Users/Zappro/repos/01-monorepo && exec bash bootstrap/mcp-launch-..."`.
+- `future-agents-local` deve ter `startup_timeout_sec = 120`; `docker` e `redis`, `40`.
+- Evitar edição direta de `~/.codex/config.toml` e `C:\Users\Zappro\.codex\config.toml`; usar os scripts de governança.
 - Nunca gravar secrets ou API keys em texto plano nos arquivos alvo — usar `env` inline no TOML/JSON apenas para keys já existentes.
 - Se variáveis de ambiente de API key não estiverem presentes, manter valores existentes — nunca forçar criação.
 - Não executar push, merge ou gates de PR.
@@ -97,7 +104,8 @@ Versões pinadas são obrigatórias. `@modelcontextprotocol/server-docker` não 
 - [ ] `claude mcp list` mostra 11 servidores: `docker`, `git`, `fetch`, `redis`, `filesystem`, `context7`, `tavily`, `TestSprite`, `chrome-devtools`, `ai-context`, `future-agents-local`.
 - [ ] `~/.codex/config.toml` (WSL) tem os 11 servidores com versões pinadas.
 - [ ] `C:\Users\Zappro\.codex\config.toml` tem os 11 servidores com versões pinadas.
-- [ ] `claude_desktop_config.json` tem os 11 servidores; `future-agents-local` usa `wsl.exe`.
-- [ ] Nenhum pacote sem versão pinada (exceto `server-docker`).
+- [ ] `C:\Users\Zappro\.codex\config.json`, se existir, está alinhado para `future-agents-local` e `docker`.
+- [ ] `claude_desktop_config.json` tem os 11 servidores; `future-agents-local` e `docker` usam `wsl.exe`.
+- [ ] Nenhuma dependência externa ficou sem versão pinada.
 - [ ] Nenhum secret novo gravado em texto plano.
 - [ ] `docker ps` executa sem erro de socket.
