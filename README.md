@@ -61,6 +61,8 @@ This repository is a blueprint and release-candidate runtime for a local-first A
 branch -> commit -> CI -> review -> human approval -> merge
 ```
 
+Mutable parallel work uses a dedicated `git worktree`; the primary checkout stays the stable baseline.
+
 ## Architecture at a Glance
 
 ```mermaid
@@ -162,6 +164,15 @@ REDIS_PORT=6380 REDIS_DB=15 \
 | `guardrails/` | Machine-readable enforcement rules |
 | `docs/` | Human reference guides |
 | `.context/` | Generated state, run evidence, plans, and exports |
+
+## Git Baseline On March 8, 2026
+
+- WSL is the authoring side for Git operations.
+- `main` remains protected and canonical.
+- The primary checkout remains the stable baseline.
+- Concurrent mutable work moves into a dedicated `git worktree`.
+- Standard operator worktree root: `../.worktrees/<repo-name>/<yyyymmdd>/<branch-name>`.
+- Branch closure still follows `/git` -> PR -> CI -> human approval.
 
 ## Read This Next
 

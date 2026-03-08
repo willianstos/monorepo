@@ -1,19 +1,23 @@
 # Guia de Git
 
+Last Updated: 08/03/2026
+
 Guia operacional para branch, checkpoint, PR e merge neste workspace.
 
 Cadeia canônica de Git:
 
 1. [`AGENTS.md`](../AGENTS.md)
 2. [`docs/guide_git.md`](./guide_git.md)
-3. [`.agent/workflows/git.md`](../.agent/workflows/git.md)
-4. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
+3. [`docs/contracts/worktree-policy.md`](./contracts/worktree-policy.md)
+4. [`.agent/workflows/git.md`](../.agent/workflows/git.md)
+5. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
 
 ## Autoridade
 
 - **Gitea** é o host autoritativo para PR, CI e merge.
 - **GitHub** é espelho somente.
 - `main` é a branch protegida e canônica.
+- `git worktree` é o sandbox mutável padrão quando houver concorrência.
 
 ## Branches
 
@@ -21,10 +25,29 @@ Cadeia canônica de Git:
 - Prefixos esperados: `feature/*`, `fix/*`, `chore/*`.
 - Mantenha a branch focada em uma mudança revisável.
 - Use escopo único por branch (ex.: somente `.agent/workflows` para documentação de fluxo).
+- Para worktree criado pelo helper do repo, o padrão é `feature/<yyyymmdd>-<slug>-<random>`.
+
+## Worktree Padrão
+
+- Base adotada em 08/03/2026: checkout principal estável + worktree dedicado para mutação concorrente.
+- Root padrão do worktree: `../.worktrees/<repo-name>/<yyyymmdd>/<branch-name>`.
+- Use WSL para criar e operar worktrees.
+- Use o helper do repo:
+
+```bash
+bash bootstrap/git-worktree.sh create "08/03/2026" "agent-workflows-main"
+```
+
+- Liste worktrees:
+
+```bash
+bash bootstrap/git-worktree.sh list
+```
 
 ## Fluxo Canônico
 
 1. Atualize a `main` local e crie a branch de trabalho.
+   - Se houver chance de concorrência mutável, crie primeiro um worktree dedicado.
 2. Trabalhe e faça commits locais normais.
 3. Rode `/validate` quando a mudança exigir validação local.
 4. Rode `/git <dd/mm/aaaa> <branch-slug>` a partir do WSL para checkpoint, sincronização e evidência.
@@ -38,6 +61,7 @@ Cadeia canônica de Git:
 - Cria checkpoint da branch quando houver mudanças pendentes.
 - Envia a branch ativa para `origin` e `github`.
 - Registra a execução em `.context/runs/git/`.
+- Não cria worktree; isso é responsabilidade do helper `bootstrap/git-worktree.sh`.
 
 Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.md).
 
@@ -48,6 +72,7 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 - Não autoriza push direto para `main`.
 - Não transforma `--merge-main` em bypass de proteção.
 - `--merge-main` sem `--scope` é bloqueado; use `--allow-wide-merge` apenas para casos aprovados de mudança transversal.
+- Não elimina a necessidade de isolamento por `worktree` quando houver mutação paralela.
 
 ## Regras de Merge
 
@@ -59,5 +84,6 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 ## Modelo Mental
 
 - O trabalho de branch termina com `/git`; a integração em `main` termina com PR.
+- O trabalho mutável concorrente começa em `worktree`; o fechamento continua em `/git` e PR.
 - Gitea governa merge; GitHub apenas espelha.
 - Nada entra em `main` sem PR, CI verde e aprovação humana.

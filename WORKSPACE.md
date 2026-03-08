@@ -21,6 +21,7 @@ Directory structure and edit ownership. The global contract remains [`AGENTS.md`
 - Operator rules: [`.agent/rules/`](.agent/rules/README.md)
 - Workflow playbooks: [`.agent/workflows/`](.agent/workflows/README.md)
 - Git and PR policy: [`docs/guide_git.md`](docs/guide_git.md), [`.agent/workflows/git.md`](.agent/workflows/git.md), [`docs/gitea-pr-validation.md`](docs/gitea-pr-validation.md)
+- Worktree isolation policy: [`docs/contracts/worktree-policy.md`](docs/contracts/worktree-policy.md), [`.agent/rules/WORKTREE_STANDARD.md`](.agent/rules/WORKTREE_STANDARD.md)
 - Model routing: [`docs/model-routing.md`](docs/model-routing.md), [`docs/local-model-policy.md`](docs/local-model-policy.md)
 - Safety model: [`GUARDRAILS.md`](GUARDRAILS.md)
 

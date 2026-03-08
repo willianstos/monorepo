@@ -9,11 +9,13 @@ version: 3.1.0
 
 > Last Updated: 08/03/2026
 
-This file is the `/git` execution playbook. Repository Git policy remains in [`AGENTS.md`](../../AGENTS.md) and [`docs/guide_git.md`](../../docs/guide_git.md). Gitea PR enforcement details live in [`docs/gitea-pr-validation.md`](../../docs/gitea-pr-validation.md).
+This file is the `/git` execution playbook. Repository Git policy remains in [`AGENTS.md`](../../AGENTS.md), [`docs/guide_git.md`](../../docs/guide_git.md), and [`docs/contracts/worktree-policy.md`](../../docs/contracts/worktree-policy.md). Gitea PR enforcement details live in [`docs/gitea-pr-validation.md`](../../docs/gitea-pr-validation.md).
 
 ## What it is
 
 A WSL-first checkpoint and sync workflow for feature branches. It records branch work and publishes it to the configured remotes without replacing the protected PR gate.
+
+`/git` assumes branch work is already happening in the correct checkout or dedicated worktree. It does not create or choose the worktree.
 
 ## When to use
 
@@ -36,6 +38,12 @@ A WSL-first checkpoint and sync workflow for feature branches. It records branch
 
 ```bash
 bash bootstrap/git-cycle.sh "<dd/mm/aaaa>" "<branch-slug>"
+```
+
+If mutable work needs isolation first:
+
+```bash
+bash bootstrap/git-worktree.sh create "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
 Default behavior:
@@ -86,6 +94,7 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 ## Guardrails
 
 - **WSL-only**: run from WSL.
+- **Worktree-first for concurrent mutable work**: if another mutable task may run in parallel, create a dedicated worktree before `/git`.
 - **No default merge**: `/git` does not imply merge to `main`.
 - **PR path remains mandatory**: use Gitea PR review plus CI and human approval before merging to `main`.
 - **Merge scope guard**: `--merge-main` requires explicit scope by default (`--scope`), except `--allow-wide-merge` for approved cross-cutting changes.
@@ -95,6 +104,7 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 ## Contract
 
 - Run from WSL only.
+- Use `bootstrap/git-worktree.sh` for standard worktree creation when isolation is needed.
 - Use `/git` as completion evidence for feature-branch work.
 - Use `main` as the merge target only with `--merge-main` and the documented approval path.
 - Keep dangerous Git operations out of the workflow.

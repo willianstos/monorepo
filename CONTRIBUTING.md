@@ -2,6 +2,8 @@
 
 Setup, validation, and change boundaries for the Future Agents workspace. Most changes touch architecture contracts, scheduler rules, provider routing, tool policy, or documentation rather than a fully wired production runtime.
 
+Last Updated: 08/03/2026
+
 ## Setup
 
 1. Create and activate a Python 3.11+ virtual environment.
@@ -33,6 +35,9 @@ REDIS_PORT=6380 REDIS_DB=15 python bootstrap/local_validation.py controlled-flow
 
 # Git checkpoint (from WSL)
 bash bootstrap/git-cycle.sh "dd/mm/yyyy" "branch-slug"
+
+# Standard mutable isolation (from WSL)
+bash bootstrap/git-worktree.sh create "dd/mm/yyyy" "branch-slug"
 ```
 
 ## Change Boundaries
@@ -46,6 +51,14 @@ bash bootstrap/git-cycle.sh "dd/mm/yyyy" "branch-slug"
 | Bootstrap and developer environment | `bootstrap/` |
 | Generated state and evidence | `.context/` only |
 | Target project seeds | `projects/` |
+
+## Worktree Baseline
+
+- Primary checkout is the stable operator baseline.
+- Concurrent mutable work uses a dedicated worktree.
+- Standard operator worktree root: `../.worktrees/<repo-name>/<yyyymmdd>/<branch-name>`.
+- Standard helper: `bash bootstrap/git-worktree.sh create "dd/mm/aaaa" "branch-slug"`.
+- Worktree policy: [`docs/contracts/worktree-policy.md`](docs/contracts/worktree-policy.md).
 
 ## CI and PR Gate
 
