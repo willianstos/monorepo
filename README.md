@@ -183,6 +183,7 @@ REDIS_PORT=6380 REDIS_DB=15 \
 | The safety model | [GUARDRAILS.md](GUARDRAILS.md) |
 | Workflow playbooks | [.agent/workflows/README.md](.agent/workflows/README.md) |
 | Junior-friendly feature flow | [docs/guide_feature_delivery.md](docs/guide_feature_delivery.md) |
+| Advanced operator CI/CD and merge flow | [docs/guide_admin_cicd.md](docs/guide_admin_cicd.md) |
 | The architecture | [docs/architecture.md](docs/architecture.md) |
 | Scheduler behavior | [docs/scheduler.md](docs/scheduler.md) |
 | Model routing and escalation | [docs/model-routing.md](docs/model-routing.md) |

@@ -33,6 +33,7 @@ How the execution layer and state layer are separated. Does not replace root aut
 |---------|---------|
 | `/git` | Close branch work, leave evidence |
 | `/pr` | Hand branch into the Gitea PR gate |
+| `/admin-cicd` | Advanced operator handoff into Gitea CI/CD without bypassing approval |
 | `/merge-ready` | Final merge-readiness checklist before using the Gitea gate |
 | `/post-merge` | Restore local baseline after the authoritative merge |
 | `/validate` | Local validation before the remote gate |

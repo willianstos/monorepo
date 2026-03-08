@@ -32,12 +32,14 @@ A short execution reminder for the canonical PR handoff.
 1. **Validate**: run `/validate` when local validation is needed.
 2. **Checkpoint**: run `/git` to sync the feature branch to `origin` first and the GitHub mirror second.
 3. **Open PR**: create the PR in Gitea against `main`.
-4. **Wait for gates**: require green CI and human approval before merge.
-5. **Final check**: run `/merge-ready` before anyone clicks merge on Gitea.
+4. **Operator lane**: if a maintainer is taking the branch through the remote gate, run `/admin-cicd`.
+5. **Wait for gates**: require green CI and human approval before merge.
+6. **Final check**: run `/merge-ready` before anyone clicks merge on Gitea.
 
 ## Guardrails
 
 - Follow [`../../docs/guide_git.md`](../../docs/guide_git.md) for the Git policy chain.
+- Use [`../../docs/guide_admin_cicd.md`](../../docs/guide_admin_cicd.md) for the advanced maintainer/operator lane.
 - Use [`../../docs/gitea-pr-validation.md`](../../docs/gitea-pr-validation.md) for branch-protection and Gitea Actions details.
 - Repository-wide delivery constraints remain in [`../../AGENTS.md`](../../AGENTS.md).
 - The PR authority is always Gitea. GitHub mirror state never replaces or unblocks the Gitea gate.

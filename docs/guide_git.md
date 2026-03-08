@@ -6,6 +6,8 @@ Guia operacional para branch, checkpoint, PR e merge neste workspace.
 
 Se você quer o passo a passo mais didático para criar uma feature, commitar por fase, abrir PR e fechar merge, comece por [`docs/guide_feature_delivery.md`](./guide_feature_delivery.md).
 
+Se você é maintainer/admin e quer o fluxo avançado da reta final para mandar a branch ao gate remoto e fechar o merge com segurança, use [`docs/guide_admin_cicd.md`](./guide_admin_cicd.md).
+
 Cadeia canônica de Git:
 
 1. [`AGENTS.md`](../AGENTS.md)
@@ -13,9 +15,10 @@ Cadeia canônica de Git:
 3. [`docs/contracts/worktree-policy.md`](./contracts/worktree-policy.md)
 4. [`.agent/workflows/git.md`](../.agent/workflows/git.md)
 5. [`.agent/workflows/pr.md`](../.agent/workflows/pr.md)
-6. [`.agent/workflows/merge-ready.md`](../.agent/workflows/merge-ready.md)
-7. [`.agent/workflows/post-merge.md`](../.agent/workflows/post-merge.md)
-8. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
+6. [`.agent/workflows/admin-cicd.md`](../.agent/workflows/admin-cicd.md)
+7. [`.agent/workflows/merge-ready.md`](../.agent/workflows/merge-ready.md)
+8. [`.agent/workflows/post-merge.md`](../.agent/workflows/post-merge.md)
+9. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
 
 ## Autoridade
 
@@ -61,10 +64,11 @@ bash bootstrap/git-worktree.sh list
 3. Rode `/validate` quando a mudança exigir validação local.
 4. Rode `/git <dd/mm/aaaa> <branch-slug>` a partir do WSL para checkpoint, sincronização e evidência.
 5. Abra o PR na Gitea contra `main`.
-6. Aguarde CI verde e aprovação humana.
-7. Rode `/merge-ready` como checklist final antes do clique de merge.
-8. Faça o merge somente pela rota protegida da Gitea.
-9. Rode `/post-merge <branch-name>` para restaurar baseline local, limpar branch e sincronizar o espelho subordinado.
+6. Se você for o operador da reta final, rode `/admin-cicd` para conduzir a branch pelo gate remoto correto.
+7. Aguarde CI verde e aprovação humana.
+8. Rode `/merge-ready` como checklist final antes do clique de merge.
+9. Faça o merge somente pela rota protegida da Gitea.
+10. Rode `/post-merge <branch-name>` para restaurar baseline local, limpar branch e sincronizar o espelho subordinado.
    - Se precisar antecipar merge em branch de trabalho para revisão formal, use `/git --merge-main --scope ...`.
 
 ## O Que `/git` Faz
@@ -88,6 +92,15 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 - Não mergeia; apenas fecha o checklist final.
 
 Sintaxe e checklist ficam em [`.agent/workflows/merge-ready.md`](../.agent/workflows/merge-ready.md).
+
+## O Que `/admin-cicd` Faz
+
+- Entrega a branch ja publicada para o gate de CI/CD autoritativo da Gitea.
+- Obriga a leitura correta dos checks obrigatorios e da aprovacao humana.
+- Deixa explicito que CI verde nao substitui aprovacao humana.
+- Nao autoriza auto-merge cego em `main`.
+
+Sintaxe e guardrails ficam em [`.agent/workflows/admin-cicd.md`](../.agent/workflows/admin-cicd.md).
 
 ## O Que `/post-merge` Faz
 

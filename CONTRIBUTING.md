@@ -60,6 +60,7 @@ bash bootstrap/git-worktree.sh create "dd/mm/yyyy" "branch-slug"
 - Standard helper: `bash bootstrap/git-worktree.sh create "dd/mm/aaaa" "branch-slug"`.
 - Worktree policy: [`docs/contracts/worktree-policy.md`](docs/contracts/worktree-policy.md).
 - End-to-end feature path for day-to-day delivery: [`docs/guide_feature_delivery.md`](docs/guide_feature_delivery.md).
+- Advanced maintainer/operator path for CI/CD and merge closure: [`docs/guide_admin_cicd.md`](docs/guide_admin_cicd.md).
 
 ## CI and PR Gate
 

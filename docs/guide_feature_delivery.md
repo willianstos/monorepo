@@ -4,6 +4,8 @@ Last Updated: 08/03/2026
 
 Guia prático para um dev pegar uma feature, trabalhar em fases, abrir PR e fechar o merge do jeito certo neste repositório.
 
+Se voce atua como maintainer/admin na reta final do PR, complemente este guia com [`docs/guide_admin_cicd.md`](./guide_admin_cicd.md).
+
 ## Regra de Ouro
 
 - `origin`/Gitea é o remoto mestre e autoritativo.
@@ -18,9 +20,10 @@ Guia prático para um dev pegar uma feature, trabalhar em fases, abrir PR e fech
 4. Rodar `/validate`.
 5. Rodar `/git`.
 6. Abrir PR com `/pr`.
-7. Conferir `/merge-ready`.
-8. Fazer o merge na Gitea.
-9. Fechar com `/post-merge`.
+7. Se voce for o operador do gate remoto, usar `/admin-cicd`.
+8. Conferir `/merge-ready`.
+9. Fazer o merge na Gitea.
+10. Fechar com `/post-merge`.
 
 ## Fase 0: Entender a Feature
 

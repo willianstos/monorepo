@@ -8,6 +8,7 @@ Execution playbooks. Not the repository contract.
 |---------|---------|------|
 | `/git` | Checkpoint and sync the active feature branch to `origin` first, then the `github` mirror | [`git.md`](./git.md) |
 | `/pr` | Handoff into the mandatory Gitea master PR gate | [`pr.md`](./pr.md) |
+| `/admin-cicd` | Advanced operator handoff into Gitea CI/CD without bypassing the human merge gate | [`admin-cicd.md`](./admin-cicd.md) |
 | `/merge-ready` | Final pre-merge checklist for the Gitea master gate | [`merge-ready.md`](./merge-ready.md) |
 | `/post-merge` | Restore local baseline after a merge already happened on Gitea | [`post-merge.md`](./post-merge.md) |
 | `/validate` | Local validation path | [`validate.md`](./validate.md) |

@@ -14,6 +14,16 @@ No merge without both passing CI and explicit human approval.
 
 Public visibility on local Gitea does not create a second governance path. Protected branch settings, Actions, approvals, and merge authority stay in Gitea.
 
+## Auto-Merge Policy
+
+Gitea branch protection applies to UI merges, API merges, and auto-merge background jobs on the authoritative host. That does not relax repository policy here.
+
+For this repository:
+
+- `main` still requires green CI and explicit human approval.
+- `github` mirror state never authorizes a merge.
+- If the host exposes auto-merge controls, do not enable blind auto-merge for `main` unless `AGENTS.md` changes through a reviewed PR first.
+
 ## 1. Enable Gitea Actions
 
 In `app.ini`:
