@@ -1,22 +1,22 @@
 # Shared Workflows
 
-> Last Updated: 2026-03-06
-
-This directory stores workspace-owned shared workflows. Antigravity uses them directly, and Codex or Claude can follow the same checked-in steps without relying on hidden prompts.
-
-## Naming Convention
-
-- `workflows/<name>.md` is the canonical workflow file.
-- The workflow basename is the intended slash command or operator entrypoint.
-- `git.md` maps to `/git`.
+Execution playbooks. Not the repository contract.
 
 ## Available Workflows
 
-- [`/git`](./git.md) — checkpoint and push the active feature branch by default; merge into `main` only with explicit `--merge-main`.
+| Command | Purpose | File |
+|---------|---------|------|
+| `/git` | Checkpoint and sync the active feature branch | [`git.md`](./git.md) |
+| `/pr` | Handoff into the mandatory Gitea PR gate | [`pr.md`](./pr.md) |
+| `/validate` | Local validation path | [`validate.md`](./validate.md) |
+| `/super-review` | Deep local pre-deploy audit for security, quality, performance, and architecture | [`super-review.md`](./super-review.md) |
+| `/release-note` | Change-summary generation | [`release-note.md`](./release-note.md) |
+| `/workflow-map` | Explain an existing workflow | [`workflow-map.md`](./workflow-map.md) |
 
-## Authoring Rules
+## Conventions
 
-- Keep workflows thin and explicit.
-- Prefer repository scripts when the workflow contains executable logic.
-- Keep dangerous Git operations out of workflows by default.
-- Keep workflows usable from Antigravity, Codex, and Claude with minimal platform-specific branching.
+- Keep workflows thin, explicit, and operational.
+- Prefer repository scripts for executable logic.
+- Do not embed repository policy in workflow files.
+- Keep the workflow index synchronized with every checked-in file in this directory.
+- Store workflow state and run history in `.context/workflow/` and `.context/runs/`.

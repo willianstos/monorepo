@@ -1,51 +1,60 @@
 # /git
 ---
-description: Hardened WSL-first Git workflow activated by /git for checkpoint, publish, explicit merge into main, branch rollover, dry runs, and smoke cleanup.
+description: WSL-first Git workflow for checkpointing and synchronizing feature branches.
 trigger: /git
-args: "[--merge-main] {dd/mm/aaaa} {nome-randomico}"
+args: "[--merge-main] {dd/mm/aaaa} {branch-slug}"
 runner: wsl
-version: 3.0.0
+version: 3.1.0
 ---
 
-> Last Updated: 06/03/2026
+> Last Updated: 08/03/2026
 
-This workflow delegates all operational logic to `bootstrap/git-cycle.sh`.
+This file is the `/git` execution playbook. Repository Git policy remains in [`AGENTS.md`](../../AGENTS.md) and [`docs/guide_git.md`](../../docs/guide_git.md). Gitea PR enforcement details live in [`docs/gitea-pr-validation.md`](../../docs/gitea-pr-validation.md).
+
+## What it is
+
+A WSL-first checkpoint and sync workflow for feature branches. It records branch work and publishes it to the configured remotes without replacing the protected PR gate.
+
+## When to use
+
+- To save progress on a feature branch.
+- To push changes to local Gitea (`origin`) and the GitHub mirror (`github`) as configured by `bootstrap/git-cycle.sh`.
+- To leave completion evidence for branch work.
+
+## When NOT to use
+
+- For direct merges into `main` outside the documented PR process.
+- To replace PR review, CI, or human approval.
 
 ## Run
 
 ```text
-/git 06/03/2026 atlas-raven
+/git <dd/mm/aaaa> <branch-slug>
 ```
 
-Explicit merge form:
-
-```text
-/git --merge-main 06/03/2026 atlas-raven
-```
-
-Equivalent command:
+## Equivalent command
 
 ```bash
-bash bootstrap/git-cycle.sh "06/03/2026" "atlas-raven"
+bash bootstrap/git-cycle.sh "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
 Default behavior:
 
-- create a checkpoint commit only if the feature branch is dirty
-- push the active feature branch to both local Gitea (`origin`) and GitHub cloud (`github`)
-- record the run under `.context/runs/git/`
-- do not merge into `main`
+- creates a checkpoint commit only if the feature branch is dirty
+- pushes the active feature branch to local Gitea (`origin`) and the GitHub mirror (`github`)
+- records the run under `.context/runs/git/`
+- does not merge into `main`
 
 Preview only:
 
 ```bash
-bash bootstrap/git-cycle.sh --dry-run "06/03/2026" "atlas-raven"
+bash bootstrap/git-cycle.sh --dry-run "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
 Explicit merge into `main` after CI, review, and human approval:
 
 ```bash
-bash bootstrap/git-cycle.sh --merge-main "06/03/2026" "atlas-raven"
+bash bootstrap/git-cycle.sh --merge-main "<dd/mm/aaaa>" "<branch-slug>"
 ```
 
 Cleanup merged smoke branches:
@@ -54,10 +63,31 @@ Cleanup merged smoke branches:
 bash bootstrap/git-cycle.sh --cleanup-smoke
 ```
 
+## Flow
+
+1. **Checkpoint**: creates a commit if the branch is dirty.
+2. **Sync**: pushes the active branch to Gitea and the GitHub mirror.
+3. **Record**: logs execution details in `.context/runs/git/`.
+
+## Outputs
+
+- Active branch pushed to `origin` and `github`.
+- Run metadata in `.context/runs/git/`.
+
+## Guardrails
+
+- **WSL-only**: run from WSL.
+- **No default merge**: `/git` does not imply merge to `main`.
+- **PR path remains mandatory**: use Gitea PR review plus CI and human approval before merging to `main`.
+- **State evidence**: run history lives under `.context/runs/git/` and `.context/workflow/`.
+
 ## Contract
 
 - Run from WSL only.
-- Treat `/git` as mandatory completion evidence for feature-branch work.
-- Use `main` as the only merge target when `--merge-main` is explicitly requested.
+- Use `/git` as completion evidence for feature-branch work.
+- Use `main` as the merge target only with `--merge-main` and the documented approval path.
 - Keep dangerous Git operations out of the workflow.
-- Persist every run under `.context/runs/git/`.
+
+## Mental model
+
+`/git` closes branch work and syncs it; it does not replace the PR gate.
