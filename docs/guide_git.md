@@ -4,13 +4,18 @@ Last Updated: 08/03/2026
 
 Guia operacional para branch, checkpoint, PR e merge neste workspace.
 
+Se você quer o passo a passo mais didático para criar uma feature, commitar por fase, abrir PR e fechar merge, comece por [`docs/guide_feature_delivery.md`](./guide_feature_delivery.md).
+
 Cadeia canônica de Git:
 
 1. [`AGENTS.md`](../AGENTS.md)
 2. [`docs/guide_git.md`](./guide_git.md)
 3. [`docs/contracts/worktree-policy.md`](./contracts/worktree-policy.md)
 4. [`.agent/workflows/git.md`](../.agent/workflows/git.md)
-5. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
+5. [`.agent/workflows/pr.md`](../.agent/workflows/pr.md)
+6. [`.agent/workflows/merge-ready.md`](../.agent/workflows/merge-ready.md)
+7. [`.agent/workflows/post-merge.md`](../.agent/workflows/post-merge.md)
+8. [`docs/gitea-pr-validation.md`](./gitea-pr-validation.md)
 
 ## Autoridade
 
@@ -75,6 +80,24 @@ bash bootstrap/git-worktree.sh list
 
 Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.md).
 
+## O Que `/merge-ready` Faz
+
+- Verifica se o PR certo já existe na Gitea contra `main`.
+- Confirma se os checks obrigatórios estão verdes e se a aprovação humana existe.
+- Confirma se o merge vai acontecer no host mestre/autoritativo e não por atalho local.
+- Não mergeia; apenas fecha o checklist final.
+
+Sintaxe e checklist ficam em [`.agent/workflows/merge-ready.md`](../.agent/workflows/merge-ready.md).
+
+## O Que `/post-merge` Faz
+
+- Atualiza a baseline local com `origin/main` depois que o merge autoritativo já ocorreu.
+- Sincroniza `main` para o espelho `github` só depois do refresh de `origin/main`.
+- Limpa branch local/remota e prune de worktree quando aplicável.
+- Não substitui o merge; só faz higiene operacional pós-merge.
+
+Sintaxe e checklist ficam em [`.agent/workflows/post-merge.md`](../.agent/workflows/post-merge.md).
+
 ## O Que `/git` Não Faz
 
 - Não abre PR.
@@ -94,7 +117,7 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 
 ## Modelo Mental
 
-- O trabalho de branch termina com `/git`; a integração em `main` termina com PR.
-- O trabalho mutável concorrente começa em `worktree`; o fechamento continua em `/git` e PR.
+- O trabalho de branch termina com `/git`; a integração em `main` passa por `/pr` e `/merge-ready`.
+- O trabalho mutável concorrente começa em `worktree`; o fechamento continua em `/git`, PR e higiene com `/post-merge`.
 - Gitea governa merge, PR e CI como remoto mestre mesmo quando o repositório estiver público; GitHub apenas espelha como remoto subordinado.
 - Nada entra em `main` sem PR, CI verde e aprovação humana.
