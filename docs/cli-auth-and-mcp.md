@@ -1,24 +1,22 @@
-# CLI Auth And MCP
+# CLI Auth and MCP
 
-> Last Updated: 2026-03-06
-
-Practical operator notes only.
+Operator notes for tool authentication and MCP server configuration. Model authority remains in [`AGENTS.md`](../AGENTS.md).
 
 ## Codex
 
-- Use `codex login` to manage sign-in.
-- ChatGPT/device-style login is the preferred CLI path when available.
-- API-key-driven configuration remains valid when that is the environment standard.
+- Sign in with `codex login`. ChatGPT/device-style login preferred; API-key config also valid.
 - `AGENTS.md` is the repo-native Codex instruction layer.
 - Prefer shared skills under `.agent/` over deprecated custom prompt patterns.
-- Use `codex mcp` to manage MCP servers for Codex.
-- For the local Epic 1 server, use [Operator MCP Local Usage](./operator/mcp-local-usage.md).
+- Manage MCP servers with `codex mcp`. For the local Epic 1 server, see [Operator MCP Local Usage](./operator/mcp-local-usage.md).
 
 ## Claude
 
-- Claude uses `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/`, and `.claude/memory/` as the checked-in project layer.
-- Claude CLI exposes `claude auth`, `claude setup-token`, and `claude mcp` for operator management.
-- Inside Claude, `/mcp` is the operator path for MCP connections and auth management.
-- Inside Claude, `/memory` is the operator path for memory handling.
-- Keep terminal, IDE, and desktop sessions aligned with the same checked-in instructions and memory files.
-- The repository MCP server remains stdio-only in Epic 1 and is documented in [Operator MCP Local Usage](./operator/mcp-local-usage.md).
+- Project layer: `CLAUDE.md`, `.claude/CLAUDE.md`, `.claude/rules/`, `.claude/memory/`.
+- Operator management: `claude auth`, `claude setup-token`, `claude mcp`.
+- Inside Claude Code: `/mcp` for MCP connections, `/memory` for memory handling.
+- Keep terminal, IDE, and desktop sessions aligned with the same checked-in instructions.
+- The repository MCP server is stdio-only in Epic 1. See [Operator MCP Local Usage](./operator/mcp-local-usage.md).
+
+## MCP Boundary
+
+MCP is an edge adapter. It exposes bounded read-only scheduler and memory tools. It does not create a second control plane, bypass CI gates, or grant merge authority. See [`docs/contracts/mcp-boundary.md`](./contracts/mcp-boundary.md) for the full contract.

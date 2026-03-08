@@ -55,7 +55,10 @@ lastUpdated: "2026-03-06T15:35:00.000Z"
 
 # Future Agents Evolution Roadmap 2026 Plan
 
-> Structured execution plan for the roadmap captured on March 6, 2026 in [plan.md](../../plan.md).
+> Historical planning snapshot. Non-authoritative.
+> See [`../../AGENTS.md`](../../AGENTS.md) and [`../../docs/authority-hierarchy.md`](../../docs/authority-hierarchy.md) before treating any item here as active policy or approved scope.
+
+> Structured execution plan for the roadmap captured on March 6, 2026. The original `plan.md` has been removed; this snapshot preserves the plan content.
 
 ## Task Snapshot
 
@@ -64,7 +67,7 @@ lastUpdated: "2026-03-06T15:35:00.000Z"
 - **In scope:** scheduler MCP server, memory MCP server, stdio and HTTP/SSE transport support, worktree lifecycle management, OpenTelemetry tracing and metrics, skill manifest and execution model, DAG visualizer v1/v2, A2A gateway, operator and validation documentation.
 - **Out of scope:** replacing Redis Streams, allowing direct agent-to-agent calls, weakening CI or human approval gates, persisting raw transcripts, turning `.agent/skills` assets into new runtime authorities, or introducing a cloud-only control plane.
 - **Key references:**
-  - [Roadmap Source](../../plan.md)
+  - Roadmap source: originally `plan.md` (removed; content preserved in this file)
   - [README](../../README.md)
   - [Architecture](../../docs/architecture.md)
   - [Scheduler Guide](../../docs/scheduler.md)

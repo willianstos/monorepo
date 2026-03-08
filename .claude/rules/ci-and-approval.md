@@ -1,8 +1,8 @@
-# CI And Approval
+# CI and Approval
 
-- CI is authoritative. Claude may assist analysis, but it does not replace CI outcomes.
-- Do not push directly to `main`.
-- Merge to `main` requires passing CI and explicit human approval.
+CI and merge-gate policy is defined in [`AGENTS.md`](../../AGENTS.md). Claude-only reminders:
+
+- Claude may assist CI analysis but does not replace CI outcomes.
+- Reviewer analysis may block progress; merge authority remains with CI plus a human approver.
 - Do not bypass the scheduler, the CI gate, or the human approval gate.
 - Do not weaken tests to make CI pass.
-- Reviewer analysis may block progress, but merge authority still remains with CI plus a human approver.

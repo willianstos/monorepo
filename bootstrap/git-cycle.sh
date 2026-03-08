@@ -26,6 +26,10 @@ random_hex() {
 }
 
 require_wsl() {
+  if [ "${BOOTSTRAP_GIT_CYCLE_ALLOW_NON_WSL:-0}" = "1" ]; then
+    return 0
+  fi
+
   if ! grep -qi microsoft /proc/version 2>/dev/null; then
     echo "This workflow must run inside WSL." >&2
     exit 1

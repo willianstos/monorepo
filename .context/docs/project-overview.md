@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Visão Geral do Projeto
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md), [`../../README.md`](../../README.md) e [`../../WORKSPACE.md`](../../WORKSPACE.md) como fontes canônicas.
+
 ## O que é este projeto
 
 `01-monorepo` é um **workspace local-first e orientado a eventos para assistência de desenvolvimento com IA**, projetado para entrega de software controlada e guiada por humanos.

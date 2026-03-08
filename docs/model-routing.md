@@ -1,34 +1,38 @@
 # Model Routing
 
-> Last Updated: 2026-03-06
+Human reference guide. Canonical model authority remains in [`AGENTS.md`](../AGENTS.md).
 
-This document is the canonical model-routing policy for the repository.
+## Runtime Authority
 
-## Authority Split
+| Model | Role |
+|-------|------|
+| Codex | Primary coding and editing engine |
+| Claude Code | Primary planning, architecture, deep debugging, review assistance |
+| Ollama `qwen3.5:9b` | Local helper: cheap, bounded, low-risk, non-authoritative |
+| Gemini | Legacy only, out of scope |
 
-- Active authoritative CLI lanes: Codex CLI and Claude Code CLI.
-- Codex: primary code generation, repository edits, and implementation work.
-- Claude Code: primary planning, architecture, deep debugging, and review assistance.
-- Ollama `qwen3.5:9b`: local helper only for cheap, bounded, low-risk tasks.
-- Antigravity: IDE environment and shared skill consumer, not headless runtime authority.
-- Gemini: legacy-only and out of scope for this repository standard.
+## Task Routing
 
-## Local-First Meaning
+| Task class | Primary | Notes |
+|------------|---------|-------|
+| Implementation, refactors, code edits | Codex | Primary coding lane |
+| Planning, architecture, deep debugging, review analysis | Claude Code | Primary reasoning lane |
+| Classification, routing, JSON normalization | `qwen3.5:9b` | Helper only |
+| Context compression, memory distillation, log summarization | `qwen3.5:9b` | Advisory output only |
+| Auth, secrets, migrations, CI, guardrails, scheduler authority | Codex or Claude | Never helper-only |
+| Ambiguous or safety-affecting work | Codex or Claude | Escalate instead of staying local-helper-only |
 
-Local-first does not mean local-authoritative. It means safe helper tasks may stay local first, while ambiguous, sensitive, or authoritative work routes upward to Codex or Claude.
+## Scope Notes
 
-## Routing Table
+- Antigravity and similar operator tools are environment surfaces, not runtime model authorities.
+- Local-first is a routing preference. It is not a substitute for human approval, CI, or repository authority.
 
-| Task class | Primary model/tool | Notes |
-| --- | --- | --- |
-| Implementation, refactors, code edits, test code changes | Codex | Main coding engine |
-| Planning, architecture, deep debugging, review analysis | Claude Code | Main reasoning engine |
-| Request classification, route selection, JSON normalization | Ollama `qwen3.5:9b` | Helper-only |
-| Context compression, memory distillation, log summarization | Ollama `qwen3.5:9b` | Advisory output only |
-| Ambiguous, sensitive, auth, secrets, migrations, CI, guardrails | Claude Code or Codex | Never local-helper-only |
+## Escalation
 
-## Escalation Rules
+- Tasks that change auth, secrets, migrations, CI, or guardrails must not stay local-helper-only.
+- Tasks affecting scheduler authority, merge decisions, or reviewer sign-off must not stay local-helper-only.
+- When in doubt, escalate to Codex or Claude.
 
-- If the task changes auth, authorization, secrets, migrations, CI, or production guardrails, do not keep it local.
-- If the task affects scheduler authority, merge decisions, or reviewer sign-off, do not keep it local.
-- If the task is unclear, route to Claude for reasoning or Codex for implementation, not to the helper model alone.
+**Local-first does not mean local-authoritative.** Helper tasks stay local. Authoritative work routes upward. When in doubt, escalate.
+
+See [`local-model-policy.md`](./local-model-policy.md) for the helper-model allowlist and blocklist.

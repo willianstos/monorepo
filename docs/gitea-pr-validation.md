@@ -1,53 +1,42 @@
 # Gitea PR Validation
 
-> Last Updated: 2026-03-06
+Operator guide for the Gitea-based PR validation gate. Git and merge policy comes from [`AGENTS.md`](../AGENTS.md) and [`guide_git.md`](./guide_git.md). This document explains how Gitea Actions, `act_runner`, and branch protection enforce that policy.
 
-This document is the canonical operator guide for the Gitea-based PR validation pipeline in `Future Agents`. It covers Gitea Actions enablement, act_runner registration, networking, branch protection, and the required PR gate.
+Local Gitea is the authoritative host for PR review, CI, and merge. GitHub is mirror-only. This document covers the PR gate on the authoritative host; it does not redefine the broader Git workflow.
 
-## Canonical PR Gate
+## Gate
 
-```text
-feature branch -> PR to main -> CI checks green -> human approval -> merge
+```
+feature branch  ->  PR to main  ->  CI green  ->  human approval  ->  merge
 ```
 
-No merge to `main` is permitted without both passing CI and explicit human approval. This aligns with `AGENTS.md`, `GUARDRAILS.md`, and `WORKSPACE.md`.
+No merge without both passing CI and explicit human approval.
 
-## 1. Enabling Gitea Actions
+## 1. Enable Gitea Actions
 
-Gitea Actions must be enabled in the Gitea instance configuration.
-
-In `app.ini` (Gitea server config), ensure:
+In `app.ini`:
 
 ```ini
 [actions]
 ENABLED = true
 ```
 
-Restart Gitea after changing `app.ini`.
+Restart Gitea after the change, then enable Actions per-repository under `Settings > Actions > General`.
 
-Then, per repository:
-1. Open `Settings > Actions > General` in the Gitea web UI.
-2. Enable Actions for the repository.
+## 2. Register act_runner
 
-## 2. Registering act_runner
+### Obtain Registration Token
 
-### 2.1 Obtain Registration Token
-
-Via Gitea web UI:
-- Navigate to `Settings > Actions > Runners`.
-- Click **Create new runner** to generate a registration token.
+Via UI: `Settings > Actions > Runners > Create new runner`.
 
 Via API:
+
 ```bash
-curl -X POST "http://<GITEA_HOST>:<PORT>/api/v1/repos/<OWNER>/future-agents/actions/runners/registration-token" \
+curl -X POST "http://<GITEA_HOST>:<PORT>/api/v1/repos/<OWNER>/<REPO>/actions/runners/registration-token" \
   -H "Authorization: token <ACCESS_TOKEN>"
 ```
 
-### 2.2 Install act_runner
-
-Download the latest `act_runner` binary from [gitea.com/gitea/act_runner/releases](https://gitea.com/gitea/act_runner/releases) for your platform.
-
-### 2.3 Register the Runner (Docker Mode)
+### Install and Register (Docker Mode)
 
 ```bash
 act_runner register \
@@ -57,186 +46,93 @@ act_runner register \
   --labels ubuntu-latest:docker://node:20-bookworm
 ```
 
-Docker mode is **required** for this pipeline because:
-- Job isolation: each job runs in a fresh container, preventing state leakage.
-- Service containers: the Redis integration job depends on a `redis:7.4-alpine` service container.
-- Reproducibility: the same container images run locally and in CI.
+Docker mode is required: job isolation, service containers for Redis, and reproducible images.
 
-### 2.4 Start the Runner
+### Start
 
 ```bash
 act_runner daemon
 ```
 
-For persistent operation, configure as a systemd service or use Docker:
+Persistent operation via Docker:
 
 ```bash
-docker run -d \
-  --name act-runner \
-  --restart always \
+docker run -d --name act-runner --restart always \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/data:/data \
   gitea/act_runner:latest daemon
 ```
 
-## 3. Networking Caveats
+## 3. Networking
 
-### 3.1 Why Loopback Breaks Job Containers
+When `act_runner` runs in Docker mode, `localhost` inside job containers refers to the container, not the host. Register the runner with a Gitea URL reachable from inside Docker:
 
-When `act_runner` runs in Docker mode, each job executes inside a Docker container. Inside that container, `localhost` and `127.0.0.1` refer to the container itself, **not** the host running Gitea.
+| Scenario | URL |
+|----------|-----|
+| Same host, Docker Desktop | `http://host.docker.internal:<PORT>` |
+| Same host, Linux | `http://<HOST_LAN_IP>:<PORT>` |
+| Remote host | `http://<REMOTE_IP>:<PORT>` |
+| Docker Compose shared network | `http://gitea:<PORT>` |
 
-If the Gitea instance URL is configured as `http://localhost:3000` or `http://127.0.0.1:3000`, the runner containers cannot reach Gitea for checkout or artifact operations.
+Service containers bind ports to the job container's loopback. `ports: ["6380:6379"]` means Redis at `127.0.0.1:6380` inside the job.
 
-### 3.2 Reachable Gitea URL
+Fallback: run `act_runner` with `--network host` and start Redis manually on the runner host.
 
-The runner must be registered with a Gitea URL that is reachable from inside Docker containers.
+## 4. Branch Protection
 
-Options (pick the one that matches your environment):
-
-| Scenario | Gitea URL |
-|----------|-----------|
-| Gitea on same host, Docker Desktop | `http://host.docker.internal:<PORT>` |
-| Gitea on same host, Linux | `http://<HOST_LAN_IP>:<PORT>` |
-| Gitea on remote host | `http://<REMOTE_IP>:<PORT>` |
-| Docker Compose with shared network | `http://gitea:<PORT>` |
-
-**Example for this workspace** (Gitea on H1 at `192.168.15.83`):
-```bash
-act_runner register \
-  --instance http://192.168.15.83:3000 \
-  --token <TOKEN> \
-  --name future-agents-runner \
-  --labels ubuntu-latest:docker://node:20-bookworm
-```
-
-### 3.3 Service Container Networking
-
-The `services:` block in workflows (used by `tests-integration-redis`) binds ports to the job container's loopback. The `ports: ["6380:6379"]` mapping means the test code inside the job container reaches Redis at `127.0.0.1:6380`.
-
-This works because the service container and the job container share a Docker network created by `act_runner`. No host-level port binding is required.
-
-### 3.4 Fallback: Host Networking
-
-If Docker service containers are unreliable in your environment, you can:
-
-1. Start Redis manually on the runner host:
-   ```bash
-   docker compose -f docker-compose.redis.yml up -d redis-integration
-   ```
-2. Run `act_runner` with `--network host` so the job container shares the host network.
-3. The test code then reaches Redis at `127.0.0.1:6380` through host networking.
-
-This is a fallback. Docker-mode service containers are the recommended path.
-
-## 4. Required Branch Protection Settings (Gitea)
-
-Navigate to `Settings > Branches > Branch protection for main`:
+Configure `main` protection in `Settings > Branches`:
 
 | Setting | Value |
 |---------|-------|
-| **Enable branch protection** | ✅ Yes |
-| **Disable push** | ✅ Yes (no direct push to main) |
-| **Enable push whitelist** | Only if specific service accounts need to push |
-| **Require pull request to merge** | ✅ Yes |
-| **Required approvals** | `1` (minimum) |
-| **Dismiss stale approvals** | ✅ Yes |
-| **Block merge on rejected reviews** | ✅ Yes |
-| **Block merge on official review requests** | ✅ Yes |
-| **Require status checks to pass** | ✅ Yes |
-| **Required status check contexts** | `Lint (ruff)`, `Type Check (mypy)`, `Unit Tests (pytest)`, `Integration Tests (Redis)` |
-| **Block merge on outdated branch** | ✅ Yes (recommended) |
+| Enable branch protection | Yes |
+| Disable push | Yes |
+| Require pull request | Yes |
+| Required approvals | 1+ |
+| Dismiss stale approvals | Yes |
+| Block merge on rejected reviews | Yes |
+| Block merge on official review requests | Yes |
+| Require status checks | Yes |
+| Required checks | `Lint (ruff)`, `Type Check (mypy)`, `Unit Tests (pytest)`, `Integration Tests (Redis)` |
+| Block merge on outdated branch | Recommended |
 
-### 4.1 Required Status Check Names
-
-The following check names must appear in "Required status check contexts" exactly as shown (these match the `name:` field of each job in `pr-validation.yml`):
-
-- `Lint (ruff)`
-- `Type Check (mypy)`
-- `Unit Tests (pytest)`
-- `Integration Tests (Redis)`
-
-After the first PR run, these names will auto-populate in the Gitea branch protection dropdown.
-
-### 4.2 Why These Settings Matter
-
-- **No direct push to main**: Forces all changes through the PR gate.
-- **Required approvals**: Enforces human review before merge.
-- **Dismiss stale approvals**: If new commits are pushed after approval, re-approval is required.
-- **Block merge on rejected reviews**: A reviewer rejection prevents merge.
-- **Require status checks**: All four validation jobs must pass before the merge button becomes available.
-
-This matches the repository's governing contract:
-> `branch -> commit -> CI -> review -> human approval -> merge` (AGENTS.md, line 94)
-
-## 5. Workflow File Location
+## 5. Workflow File
 
 ```
 .gitea/workflows/pr-validation.yml
 ```
 
-Gitea Actions reads workflows from `.gitea/workflows/` (not `.github/workflows/`). This is a Gitea-specific convention.
-
-## 6. Validation Commands in the Pipeline
-
-The PR validation workflow executes these exact commands:
+## 6. Pipeline Commands
 
 | Job | Command |
 |-----|---------|
-| **lint** | `python -m ruff check workspace projects` |
-| **types** | `python -m mypy workspace` |
-| **tests-unit** | `python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q` |
-| **tests-integration-redis** | `python -m pytest workspace/scheduler/test_redis_integration.py -q` |
-| **compile-check** | `python -m compileall bootstrap workspace` |
+| lint | `python -m ruff check workspace projects` |
+| types | `python -m mypy workspace` |
+| tests-unit | `python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q` |
+| tests-integration-redis | `python -m pytest workspace/scheduler/test_redis_integration.py -q` |
+| compile-check | `python -m compileall bootstrap workspace` |
 
-All jobs use `python -m pip install -e .[dev]` for dependency installation, matching the repository's `pyproject.toml` dev dependencies (pytest, ruff, mypy).
+All jobs use `python -m pip install -e .[dev]`.
 
-## 7. Running the PR Validation Locally
-
-Operators can reproduce the exact CI pipeline locally without Gitea:
+## 7. Local Reproduction
 
 ```bash
-# 1. Environment setup
 python3 -m venv .context/.venv
 .context/.venv/bin/python -m pip install -e .[dev]
-
-# 2. Lint
 .context/.venv/bin/python -m ruff check workspace projects
-
-# 3. Type check
 .context/.venv/bin/python -m mypy workspace
-
-# 4. Unit tests
 .context/.venv/bin/python -m pytest workspace/scheduler/test_orchestration.py workspace/tools/test_policies.py -q
-
-# 5. Start Redis
 docker compose -f docker-compose.redis.yml up -d redis-integration
-
-# 6. Redis integration tests
 REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 \
   .context/.venv/bin/python -m pytest workspace/scheduler/test_redis_integration.py -q
-
-# 7. Compile check
 .context/.venv/bin/python -m compileall bootstrap workspace
 ```
 
-These are the same commands that run in CI. If all pass locally, the PR pipeline will pass.
-
 ## 8. Troubleshooting
 
-### Runner cannot clone repository
-- Verify the Gitea URL used during `act_runner register` is reachable from inside Docker containers.
-- Test with `docker run --rm curlimages/curl curl -s http://<GITEA_URL>/api/v1/version`.
+**Runner cannot clone** — Verify the Gitea URL used during registration is reachable from inside Docker containers.
 
-### Redis service not available in integration tests
-- Check that `act_runner` has access to `docker.sock`.
-- Verify the runner label includes `docker://` prefix for Docker-mode execution.
-- Fallback: use host networking as described in section 3.4.
+**Redis unavailable in integration tests** — Check Docker socket access and the `docker://` runner label. Fall back to host networking if needed.
 
-### Status checks not appearing in branch protection
-- Run the pipeline at least once. Gitea populates the check names after the first run.
-- Ensure the job `name:` fields match the strings in "Required status check contexts".
+**Status checks missing in branch protection** — Run the pipeline once first, then use the autocomplete dropdown.
 
-### Tests pass locally but fail in CI
-- CI uses a clean `python -m pip install -e .[dev]` without pre-existing cache.
-- CI does not use `.context/.venv`. It creates a fresh environment per job.
-- Redis in CI runs at `127.0.0.1:6380` through Docker service port mapping, same as local.
+**Tests pass locally but fail in CI** — CI uses clean `pip install -e .[dev]`, not `.context/.venv`. Redis in CI runs at `127.0.0.1:6380` via service port mapping.

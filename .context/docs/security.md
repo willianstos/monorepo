@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Segurança e Conformidade
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md) e [`../../GUARDRAILS.md`](../../GUARDRAILS.md) como fontes canônicas.
+
 **Fonte canônica:** `GUARDRAILS.md`
 
 O objetivo do modelo de segurança deste sistema é simples: **guardrails devem ser verdadeiros porque o código os aplica, não porque os docs os afirmam.**

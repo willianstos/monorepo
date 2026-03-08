@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Fluxo de Dados e Integrações
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../AGENTS.md`](../../AGENTS.md) e os docs canônicos em [`../../docs/`](../../docs/) antes de usar este arquivo como referência operacional.
+
 ## Pipeline Principal de Tarefas
 
 O workflow padrão disparado por um evento `issue_created`:

@@ -1,4 +1,3 @@
 # Codex Rules
 
-Primary operating rules live in `docs/agent_rules.md`.
-
+Compatibility pointer. The active Codex repository contract is [`AGENTS.md`](../../AGENTS.md). Shared operator rules live in [`.agent/rules/`](../../.agent/rules/README.md).

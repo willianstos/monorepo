@@ -1,5 +1,8 @@
 # Runbook de Validação Local
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../docs/local-validation.md`](../../docs/local-validation.md) como fonte canônica.
+
 **Fonte canônica:** [docs/local-validation.md](../../docs/local-validation.md)
 
 Este runbook cobre a validação do scheduler, Redis Streams, autoridade do CI, gate de aprovação humana e gate de merge localmente — sem construir uma plataforma de orquestração completa.

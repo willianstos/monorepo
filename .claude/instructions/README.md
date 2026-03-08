@@ -1,10 +1,11 @@
 # Claude Instructions
 
-Primary Claude instructions live in:
+Compatibility pointer. Non-authoritative.
 
-- `../CLAUDE.md`
-- `../../CLAUDE.md`
+Active Claude instructions:
+
+- [`../../AGENTS.md`](../../AGENTS.md)
+- [`../CLAUDE.md`](../CLAUDE.md)
+- [`../../CLAUDE.md`](../../CLAUDE.md)
 - `../rules/*.md`
 - `../memory/*.md`
-
-Use `docs/agent_rules.md` as supporting architecture context, not as the primary Claude instruction layer.

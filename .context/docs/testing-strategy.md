@@ -10,6 +10,9 @@ scaffoldVersion: "2.0.0"
 
 # Estratégia de Testes
 
+> Snapshot gerado. Não autoritativo.
+> Veja [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md) e os testes canônicos do repositório como fontes operacionais.
+
 ## Framework de Testes
 
 Este projeto utiliza **pytest** (≥8.3.0) com caminhos de teste configurados em `pyproject.toml` cobrindo `workspace/` e `projects/`.

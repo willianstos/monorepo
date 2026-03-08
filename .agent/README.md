@@ -1,23 +1,24 @@
-# Agent Workspace Assets
+# Shared Operator Layer
 
-> Last Updated: 2026-03-06
-
-This directory is the shared agent layer for Codex, Claude-compatible workflows, and Antigravity. Keep it tool-agnostic where possible.
+Shared operator rules, workflows, skills, and memory. Does not replace [`AGENTS.md`](../AGENTS.md).
 
 ## Layout
 
-- `skills/` — curated workspace-owned skills.
-- `catalogs/` — vendored third-party skill repositories kept intact as references, not default load paths.
-- `workflows/` — shared workflow playbooks. Antigravity consumes them directly; Codex and Claude can follow them manually.
-- `memory/` — short tool-agnostic notes and distilled reminders.
-- `rules/` — workspace-owned operating rules such as `/git`.
-- `backups/` — recovery material only.
+| Directory | Contents |
+|-----------|----------|
+| `rules/` | Shared operational rules |
+| `workflows/` | Executable workflow playbooks |
+| `skills/` | Canonical shared skills and capability assets |
+| `catalogs/` | Vendored third-party skill sources (reference only) |
+| `memory/` | Short shared notes and distilled reminders |
+| `backups/` | Recovery material |
 
 ## Conventions
 
-- Put workspace-owned skills under `skills/<skill-name>/SKILL.md`.
-- Keep vendored catalogs under `catalogs/` without flattening them into the active skill tree.
-- Select a category first and load one relevant skill when possible.
-- Do not bulk-load skills or catalogs into model context.
-- Summarize generated context before passing it onward.
-- `.agent/memory/` is shared and tool-agnostic. `.claude/memory/` is Claude-specific durable project memory.
+- Repository-wide architecture, agent boundaries, model authority, and delivery rules belong in [`AGENTS.md`](../AGENTS.md), not here.
+- Shared operator behavior: [`rules/`](./rules/README.md)
+- Runnable workflow steps: [`workflows/`](./workflows/README.md)
+- Capability assets: [`skills/`](./skills/README.md)
+- `.context/` is generated state, not shared operator authority.
+- Prefer one relevant skill at a time. Do not bulk-load catalogs.
+- Keep `.agent/memory/` shared and tool-agnostic. Claude-specific memory belongs in `.claude/memory/`.

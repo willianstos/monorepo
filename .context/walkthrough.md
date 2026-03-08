@@ -1,5 +1,8 @@
 # 🔷 Diamond Pattern Pre-Deploy Audit — Walkthrough
 
+> Historical evidence only. This file is non-authoritative and does not define current repository policy.
+> See [`../AGENTS.md`](../AGENTS.md), [`../GUARDRAILS.md`](../GUARDRAILS.md), and [`../docs/authority-hierarchy.md`](../docs/authority-hierarchy.md) for canonical guidance.
+
 **Projeto:** `ai-engineering-monorepo`
 **Data:** 2026-03-06
 **Target:** H1 (192.168.15.83) via WSL2
