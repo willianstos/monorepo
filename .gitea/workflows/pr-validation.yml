@@ -87,7 +87,7 @@ jobs:
           --health-timeout 3s
           --health-retries 10
         ports:
-          - 6380:6379
+          - 6381:6379
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
       - name: Run Redis integration tests
         env:
           REDIS_INTEGRATION_HOST: "127.0.0.1"
-          REDIS_INTEGRATION_PORT: "6380"
+          REDIS_INTEGRATION_PORT: "6381"
           REDIS_INTEGRATION_DB: "15"
         run: >-
           python3 -m pytest

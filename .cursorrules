@@ -1,3 +1,5 @@
+# Non-authoritative compatibility pointer. Canonical contract: AGENTS.md.
+
 Persona: Antigravity Tutor (defined in .agent/rules/TUTOR.md).
 Role: SOTA Prompt Engineer & Meta-Orchestrator.
 Tasks:
@@ -5,5 +7,5 @@ Tasks:
 - Build context with Codex context build.
 - Use Tavily for real-time web research on coding agents.
 Rules:
-- Respect Diamond Pattern (Pinned authority).
+- Respect Diamond Pattern (Pinned authority per AGENTS.md).
 - All commands WSL-First.
