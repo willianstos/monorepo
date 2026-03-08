@@ -11,15 +11,16 @@ Policy comes from [`AGENTS.md`](../AGENTS.md), [`guide_git.md`](./guide_git.md),
 | Item | Value |
 |------|-------|
 | Gitea HTTP (WSL/host) | `http://localhost:3001` |
-| Gitea HTTP (from containers) | `http://192.168.15.83:3001` |
+| Gitea HTTP (from containers) | `http://172.17.0.1:3001` (Docker bridge gateway) |
 | Gitea SSH | `ssh://git@localhost:222/...` |
 | Admin user | `admin` |
 | Gitea image | `gitea/gitea:1.25.4` |
 | Repository | `admin/ai-engineering-monorepo` |
 | Compose project | `/home/will/projetos/gitea-wsl-ops` |
 | Protected branch | `main` |
+| `GITEA_ROOT_URL` | `http://172.17.0.1:3001/` (set in `.env`) |
 
-> Containers cannot reach `localhost:3001`. Register `act_runner` with `http://192.168.15.83:3001`.
+> Containers cannot reach `localhost:3001`. `GITEA_ROOT_URL` must be set to `http://172.17.0.1:3001/` (Docker bridge gateway) so clone URLs in job containers resolve correctly. `172.17.0.1` is stable across restarts; prefer it over the LAN IP (`192.168.15.83`) which can change.
 
 ---
 
@@ -108,7 +109,7 @@ Configure `main` protection: PR-based merge, at least one approval, the four req
 
 **Runner idle** — Confirm labels match `runs-on`, Docker socket is mounted.
 
-**Jobs cannot reach Gitea** — Re-register with `http://192.168.15.83:3001`. Test: `docker run --rm curlimages/curl curl -s http://192.168.15.83:3001/api/v1/version`.
+**Jobs cannot reach Gitea / checkout fails** — Verify `GITEA_ROOT_URL=http://172.17.0.1:3001/` in `.env` and that Gitea was restarted (`docker compose up -d --force-recreate gitea`). Confirm with: `docker exec gitea grep ROOT_URL /data/gitea/conf/app.ini`. Smoke-test from a container: `docker run --rm alpine sh -c "apk add -q curl && curl -sf http://172.17.0.1:3001/api/v1/version"`. Do not use `192.168.15.83` (LAN IP can change) or `localhost` (resolves to loopback inside containers).
 
 **Status checks missing** — Run the pipeline at least once, then use the branch-protection dropdown.
 

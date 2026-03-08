@@ -70,9 +70,11 @@ When `act_runner` runs in Docker mode, `localhost` inside job containers refers 
 | Scenario | URL |
 |----------|-----|
 | Same host, Docker Desktop | `http://host.docker.internal:<PORT>` |
-| Same host, Linux | `http://<HOST_LAN_IP>:<PORT>` |
+| Same host, Linux/WSL2 (Docker CE) | `http://172.17.0.1:<PORT>` (Docker bridge gateway — stable across restarts) |
 | Remote host | `http://<REMOTE_IP>:<PORT>` |
 | Docker Compose shared network | `http://gitea:<PORT>` |
+
+**Important (Linux/WSL2):** Set `GITEA_ROOT_URL=http://172.17.0.1:3001/` in the Gitea stack's `.env`. This controls the clone URL embedded in workflow metadata. Using `localhost` causes checkout failures because `localhost` inside job containers resolves to the container's own loopback, not the WSL2 host.
 
 Service containers bind ports to the job container's loopback. `ports: ["6380:6379"]` means Redis at `127.0.0.1:6380` inside the job.
 
@@ -129,7 +131,7 @@ REDIS_INTEGRATION_PORT=6380 REDIS_INTEGRATION_DB=15 \
 
 ## 8. Troubleshooting
 
-**Runner cannot clone** — Verify the Gitea URL used during registration is reachable from inside Docker containers.
+**Runner cannot clone** — The root cause is almost always `ROOT_URL` being `http://localhost:3001/`. Fix: set `GITEA_ROOT_URL=http://172.17.0.1:3001/` in `.env` and restart Gitea (`docker compose up -d --force-recreate gitea`). Verify: `docker exec gitea grep ROOT_URL /data/gitea/conf/app.ini`. Smoke-test: `docker run --rm alpine sh -c "apk add -q curl && curl -sf http://172.17.0.1:3001/api/v1/version"`. Do not use `--add-host=localhost:172.17.0.1` in runner config — it has no effect because the container's libc resolves `localhost` to its loopback before checking `/etc/hosts`.
 
 **Redis unavailable in integration tests** — Check Docker socket access and the `docker://` runner label. Fall back to host networking if needed.
 
