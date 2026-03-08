@@ -32,7 +32,8 @@ Local-first AI coding assistant workspace for controlled software delivery. Assi
 - Agent communication: events only. No direct agent-to-agent calls.
 - CI: authoritative.
 - Code host authority: local Gitea for pull requests, CI, and merge.
-- GitHub: public mirror only. Mirror sync does not change merge authority.
+- Remote ordering: `origin`/Gitea is the master authoritative remote. `github` is a subordinate public mirror only.
+- GitHub mirror sync does not change merge authority.
 - Merge to `main`: requires human approval after CI passes.
 - Local-first routing: preserved.
 - Raw conversation logs: never enter durable memory.
@@ -91,6 +92,7 @@ Save stable decisions, architecture constraints, validated lessons, and short op
 - `tester` does not weaken tests or edit implementation files.
 - `reviewer` may block progress but does not mutate code during review.
 - No direct push to `main`.
+- Any agent performing sync or push must treat `origin` as the source-of-truth remote and `github` as best-effort mirror sync only.
 - Required path: `branch -> commit -> CI -> review -> human approval -> merge`.
 - No agent may claim success without CI evidence.
 

@@ -5,11 +5,13 @@ usage() {
   cat <<'EOF'
 Usage:
   bash bootstrap/github-mirror-auth.sh ensure [--quiet]
+  bash bootstrap/github-mirror-auth.sh web [--quiet]
   bash bootstrap/github-mirror-auth.sh check [--quiet]
   bash bootstrap/github-mirror-auth.sh status
 
 Commands:
   ensure   Register GitHub mirror auth once. Try GitHub CLI HTTPS first, then fall back to an SSH deploy key for the configured repo.
+  web      Re-authenticate with GitHub browser login (`gh auth login -w`) and then validate mirror push.
   check    Validate real mirror push health for the configured github remote.
   status   Print a human-readable status summary.
 EOF
@@ -181,6 +183,30 @@ setup_git_helper() {
 login_with_token() {
   local token="$1"
   printf '%s\n' "$token" | gh auth login --hostname github.com --git-protocol https --with-token >/dev/null
+}
+
+login_with_web() {
+  gh auth login --hostname github.com --git-protocol https --web
+}
+
+current_github_user() {
+  gh api user --jq '.login' 2>/dev/null || true
+}
+
+logout_current_auth() {
+  local current_user
+
+  if ! is_logged_in; then
+    return 0
+  fi
+
+  current_user="$(current_github_user)"
+  if [ -n "$current_user" ]; then
+    gh auth logout --hostname github.com --user "$current_user" >/dev/null
+    return 0
+  fi
+
+  gh auth logout --hostname github.com >/dev/null
 }
 
 repo_push_permission() {
@@ -407,6 +433,38 @@ ensure_auth() {
   fi
 }
 
+web_auth() {
+  local slug permission previous_pushurl
+
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "GitHub CLI (gh) is required for browser auth." >&2
+    exit 1
+  fi
+
+  logout_current_auth
+  login_with_web
+  setup_git_helper
+  log "GitHub CLI browser auth and git credential helper are configured."
+
+  if slug="$(parse_github_slug)"; then
+    permission="$(repo_push_permission "$slug" 2>/dev/null || printf 'unknown')"
+    if git_push_dry_run_ok; then
+      log "GitHub mirror push permission confirmed for $slug."
+      return 0
+    fi
+
+    previous_pushurl="$(github_explicit_pushurl)"
+    if ensure_ssh_deploy_key_fallback "$slug" && git_push_dry_run_ok; then
+      log "GitHub mirror switched to SSH deploy-key mode for $slug."
+      return 0
+    fi
+    restore_remote_pushurl "$previous_pushurl"
+
+    echo "Browser auth completed, but git push dry-run to $slug still fails (api_permissions=$permission)." >&2
+    exit 2
+  fi
+}
+
 check_auth() {
   local slug permission
 
@@ -433,6 +491,9 @@ check_auth() {
 case "$command_name" in
   ensure)
     ensure_auth
+    ;;
+  web)
+    web_auth
     ;;
   check)
     check_auth

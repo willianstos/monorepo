@@ -37,7 +37,7 @@
 </p>
 
 > [!NOTE]
-> Status on March 8, 2026: release candidate for controlled local operation. Local Gitea may be public-readable for operator convenience, but it remains the authoritative host for pull requests, CI, and merge. GitHub is the public mirror only.
+> Status on March 8, 2026: release candidate for controlled local operation. Local Gitea may be public-readable for operator convenience, but it remains the authoritative master host for pull requests, CI, and merge. GitHub is the subordinate public mirror only.
 
 Most AI agent repositories optimize for demo velocity. Future Agents optimizes for delivery control.
 
@@ -53,7 +53,7 @@ This repository is a blueprint and release-candidate runtime for a local-first A
 | "Trust the agent" | Trust CI, audit logs, and explicit human approval |
 | Raw chat gets saved as memory | Durable memory rejects raw conversation logs |
 | One expensive model everywhere | `qwen3.5:9b` handles bounded helper work; Codex or Claude own authoritative decisions |
-| GitHub repo is the source of truth | Gitea is authoritative even when public-readable; GitHub is mirror-only |
+| GitHub repo is the source of truth | Gitea is the master authoritative host even when public-readable; GitHub is subordinate mirror-only |
 
 ## The One-Line Contract
 

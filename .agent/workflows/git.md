@@ -52,12 +52,18 @@ One-time GitHub mirror bootstrap for this WSL profile:
 bash bootstrap/github-mirror-auth.sh ensure
 ```
 
+If local PAT bootstrap is rejected, switch to browser-assisted re-auth:
+
+```bash
+bash bootstrap/github-mirror-auth.sh web
+```
+
 Default behavior:
 
 - creates a checkpoint commit only if the feature branch is dirty
 - ensures mirror bootstrap once when the `github` remote exists, using HTTPS via `gh` first and repo-scoped SSH deploy key fallback if needed
 - uses pinned SSH alias and deploy key naming derived from the repo slug when SSH fallback is needed
-- pushes the active feature branch to local Gitea (`origin`) and then attempts to sync the GitHub mirror (`github`)
+- pushes the active feature branch to local Gitea (`origin`) first as the authoritative master remote and then attempts to sync the GitHub mirror (`github`)
 - records the run under `.context/runs/git/`
 - does not merge into `main`
 
@@ -105,6 +111,7 @@ bash bootstrap/git-cycle.sh --cleanup-smoke
 - **WSL-only**: run from WSL.
 - **Worktree-first for concurrent mutable work**: if another mutable task may run in parallel, create a dedicated worktree before `/git`.
 - **No default merge**: `/git` does not imply merge to `main`.
+- **Remote precedence is fixed**: `origin`/Gitea is master and mandatory; `github` is subordinate mirror sync only.
 - **Gitea stays authoritative**: GitHub mirror sync is secondary and does not replace the Gitea PR, CI, or merge gate.
 - **PR path remains mandatory**: use Gitea PR review plus CI and human approval before merging to `main`.
 - **Merge scope guard**: `--merge-main` requires explicit scope by default (`--scope`), except `--allow-wide-merge` for approved cross-cutting changes.

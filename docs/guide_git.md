@@ -14,9 +14,9 @@ Cadeia canônica de Git:
 
 ## Autoridade
 
-- **Gitea** é o host autoritativo para PR, CI e merge.
+- **Gitea** é o host mestre e autoritativo para PR, CI e merge.
 - O repositório na **Gitea** pode ficar público para leitura local sem mudar essa autoridade.
-- **GitHub** é espelho somente para distribuição e backup; não governa PR, CI ou merge.
+- **GitHub** é espelho subordinado somente para distribuição e backup; não governa PR, CI ou merge.
 - `main` é a branch protegida e canônica.
 - `git worktree` é o sandbox mutável padrão quando houver concorrência.
 
@@ -51,6 +51,7 @@ bash bootstrap/git-worktree.sh list
    - Se houver chance de concorrência mutável, crie primeiro um worktree dedicado.
    - Se o espelho GitHub ainda não foi registrado nesta instalação WSL, rode `bash bootstrap/github-mirror-auth.sh ensure` uma vez. O helper tenta HTTPS com `gh` e, se necessário, provisiona `pushurl` SSH com deploy key do repositório.
    - O fallback SSH usa alias fixo `github-mirror-<owner>-<repo>` e título fixo `wsl-github-mirror-<owner>-<repo>`.
+   - Se `ensure` falhar no `git push --dry-run`, rode `bash bootstrap/github-mirror-auth.sh web` para reautenticação assistida por browser antes de insistir no PAT local.
 2. Trabalhe e faça commits locais normais.
 3. Rode `/validate` quando a mudança exigir validação local.
 4. Rode `/git <dd/mm/aaaa> <branch-slug>` a partir do WSL para checkpoint, sincronização e evidência.
@@ -63,11 +64,12 @@ bash bootstrap/git-worktree.sh list
 
 - Cria checkpoint da branch quando houver mudanças pendentes.
 - Garante o bootstrap do espelho GitHub quando o remote `github` estiver configurado.
-- Envia a branch ativa para `origin` e tenta sincronizar o espelho `github` quando ele estiver configurado.
+- Envia a branch ativa primeiro para `origin` como remoto mestre/autoritativo e depois tenta sincronizar o espelho `github`.
 - Registra a execução em `.context/runs/git/`.
 - Não cria worktree; isso é responsabilidade do helper `bootstrap/git-worktree.sh`.
 - O bootstrap do espelho considera válido apenas o que passa em `git push --dry-run` no remote `github`.
 - Se o fallback SSH não ficar saudável, o helper restaura o `pushurl` anterior do remote `github`.
+- O modo `web` faz `gh auth login -w`, recompõe o credential helper e repete a validação do espelho.
 
 Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.md).
 
@@ -92,5 +94,5 @@ Sintaxe e opções ficam em [`.agent/workflows/git.md`](../.agent/workflows/git.
 
 - O trabalho de branch termina com `/git`; a integração em `main` termina com PR.
 - O trabalho mutável concorrente começa em `worktree`; o fechamento continua em `/git` e PR.
-- Gitea governa merge, PR e CI mesmo quando o repositório estiver público; GitHub apenas espelha.
+- Gitea governa merge, PR e CI como remoto mestre mesmo quando o repositório estiver público; GitHub apenas espelha como remoto subordinado.
 - Nada entra em `main` sem PR, CI verde e aprovação humana.

@@ -13,6 +13,7 @@ Current intent:
 - The SSH fallback uses pinned identifiers derived from the repo slug: SSH host alias `github-mirror-<owner>-<repo>` and deploy key title `wsl-github-mirror-<owner>-<repo>`.
 - GitHub mirror auth is considered healthy only when `bootstrap/github-mirror-auth.sh check` passes the real `git push --dry-run` probe against the configured `github` remote.
 - If SSH fallback cannot complete, the helper restores the previous `remote.github.pushurl` instead of leaving the mirror half-switched.
+- If PAT-based auth keeps failing, `bootstrap/github-mirror-auth.sh web` runs the official browser/device flow from `gh auth login -w` and then revalidates the mirror.
 - Live secrets must stay outside the repo in the operational `.env` owned by the WSL stack.
 - Placeholder markers such as `__generate_strong_secret__` must be replaced in the live `.env`, never committed as real values.
 
